@@ -1,9 +1,7 @@
 plugins {
-    "java-library"
+    id("java-library")
     kotlin("jvm") version "1.2.51"
     id("com.diffplug.gradle.spotless") version "3.13.0"
-    id("com.palantir.docker") version "0.20.1"
-    id("com.palantir.git-version") version "0.11.0"
 }
 
 apply {
@@ -15,12 +13,20 @@ repositories {
     maven(url = "http://packages.confluent.io/maven/")
 }
 
+group = "no.nav.dagpenger"
 version = "0.0.1"
 
+val kafkaVersion = "2.0.0"
+val confluentVersion = "4.1.2"
 val kotlinLoggingVersion = "1.4.9"
 
 dependencies {
     implementation(kotlin("stdlib"))
+    implementation("no.nav.dagpenger:events:0.0.1")
+
+    api("org.apache.kafka:kafka-clients:$kafkaVersion")
+    api("org.apache.kafka:kafka-streams:$kafkaVersion")
+    api("io.confluent:kafka-streams-avro-serde:$confluentVersion")
 
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
 

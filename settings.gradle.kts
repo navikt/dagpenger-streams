@@ -1,4 +1,4 @@
-rootProject.name = "dagpenger-streams"
+rootProject.name = "streams"
 
 pluginManagement {
     repositories {
