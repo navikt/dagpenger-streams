@@ -2,12 +2,7 @@ package no.nav.dagpenger.streams
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
-import no.nav.dagpenger.events.Person
-import no.nav.dagpenger.events.avro.Journalpost
-import no.nav.dagpenger.events.avro.journalføring.InngåendeJournalpost
-import no.nav.dagpenger.events.avro.journalføring.TynnInngåendeJournalpost
 import org.apache.avro.specific.SpecificRecord
-import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.kstream.Consumed
 import org.apache.kafka.streams.kstream.KStream
@@ -19,29 +14,29 @@ private val serdeConfig = mapOf(
 )
 
 object Topics {
-    val JOARK_EVENTS = Topic(
-        "joark",
-        keySerde = Serdes.String(),
-        valueSerde = configureAvroSerde<TynnInngåendeJournalpost>()
-    )
-
-    val INNGÅENDE_JOURNALPOST = Topic(
-        "inngaaende_journalpost",
-        keySerde = Serdes.String(),
-        valueSerde = configureAvroSerde<InngåendeJournalpost>()
-    )
-
-    val JOURNALPOST = Topic(
-        "journalpost",
-        keySerde = Serdes.String(),
-        valueSerde = configureAvroSerde<Journalpost>()
-    )
-
-    val SØKNAD = Topic(
-        "søknad",
-        keySerde = Serdes.String(),
-        valueSerde = configureAvroSerde<Person>()
-    )
+//    val JOARK_EVENTS = Topic(
+//        "joark",
+//        keySerde = Serdes.String(),
+//        valueSerde = configureAvroSerde<TynnInngåendeJournalpost>()
+//    )
+//
+//    val INNGÅENDE_JOURNALPOST = Topic(
+//        "inngaaende_journalpost",
+//        keySerde = Serdes.String(),
+//        valueSerde = configureAvroSerde<InngåendeJournalpost>()
+//    )
+//
+//    val JOURNALPOST = Topic(
+//        "journalpost",
+//        keySerde = Serdes.String(),
+//        valueSerde = configureAvroSerde<Journalpost>()
+//    )
+//
+//    val SØKNAD = Topic(
+//        "søknad",
+//        keySerde = Serdes.String(),
+//        valueSerde = configureAvroSerde<Person>()
+//    )
 }
 
 private fun <T : SpecificRecord?> configureAvroSerde(): SpecificAvroSerde<T> {
