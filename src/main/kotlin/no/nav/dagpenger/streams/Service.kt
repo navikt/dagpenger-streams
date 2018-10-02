@@ -12,7 +12,7 @@ abstract class Service {
     private lateinit var streams: KafkaStreams
     fun start() {
         streams = setupStreams()
-        //streams.start()
+        streams.start()
         LOGGER.info("Started Service $SERVICE_APP_ID")
         addShutdownHook()
     }
