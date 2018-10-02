@@ -30,7 +30,7 @@ val kotlinLoggingVersion = "1.4.9"
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("no.nav.dagpenger:events:0.1.2")
+    implementation("no.nav.dagpenger:events:0.1.4")
 
     api("org.apache.kafka:kafka-clients:$kafkaVersion")
     api("org.apache.kafka:kafka-streams:$kafkaVersion")
