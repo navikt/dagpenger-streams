@@ -25,7 +25,7 @@ repositories {
 group = "no.nav.dagpenger"
 
 val kafkaVersion = "2.0.0"
-val confluentVersion = "4.1.2"
+val confluentVersion = "5.0.0"
 val kotlinLoggingVersion = "1.4.9"
 
 dependencies {
