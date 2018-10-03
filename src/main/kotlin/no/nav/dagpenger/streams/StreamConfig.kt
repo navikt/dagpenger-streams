@@ -2,15 +2,22 @@ package no.nav.dagpenger.streams
 
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.common.config.SaslConfigs
+import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.errors.LogAndFailExceptionHandler
+import java.io.File
+import java.lang.RuntimeException
+import java.lang.System.getenv
 import java.util.Properties
 
-private val bootstrapServersConfig = System.getenv("BOOTSTRAP_SERVERS_CONFIG") ?: "localhost:9092"
+private val bootstrapServersConfig = getenv("KAFKA_BOOTSTRAP_SERVERS_URL") ?: "localhost:9092"
 
 fun streamConfig(
     appId: String,
-    stateDir: String? = null
+    stateDir: String? = null,
+    username: String? = null,
+    password: String? = null
 ): Properties {
     return Properties().apply {
         putAll(
@@ -28,5 +35,22 @@ fun streamConfig(
         )
 
         stateDir?.let { put(StreamsConfig.STATE_DIR_CONFIG, stateDir) }
+
+        username?.let { name -> password.let { pwd ->
+            put(SaslConfigs.SASL_MECHANISM, "PLAIN")
+            put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL")
+            put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$name\" password=\"$pwd\";")
+
+            put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, trustStore())
+            put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, getenv("KAFKA_SSL_TRUSTSTORE_PASSWORD"))
+        } }
+    }
+}
+
+fun trustStore(): String {
+    try {
+        return File(ClassLoader.getSystemResource(getenv("KAFKA_SSL_TRUSTSTORE_LOCATION")).toURI()).absolutePath
+    } catch (e: Exception) {
+        throw RuntimeException("Failed to get trust store location from env KAFKA_SSL_TRUSTSTORE_LOCATION", e)
     }
 }
