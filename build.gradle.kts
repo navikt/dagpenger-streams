@@ -19,10 +19,12 @@ apply {
 repositories {
     jcenter()
     maven(url = "http://packages.confluent.io/maven/")
+    maven(url = "https://repo.adeo.no/repository/maven-snapshots/")
     maven(url = "https://repo.adeo.no/repository/maven-releases/")
 }
 
 group = "no.nav.dagpenger"
+version = "0.1.3-SNAPSHOT"
 
 val kafkaVersion = "2.0.0"
 val confluentVersion = "5.0.0"
@@ -30,7 +32,7 @@ val kotlinLoggingVersion = "1.4.9"
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("no.nav.dagpenger:events:0.1.4")
+    implementation("no.nav.dagpenger:events:0.1.5-SNAPSHOT")
 
     api("org.apache.kafka:kafka-clients:$kafkaVersion")
     api("org.apache.kafka:kafka-streams:$kafkaVersion")
