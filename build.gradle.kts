@@ -21,6 +21,7 @@ repositories {
     maven(url = "http://packages.confluent.io/maven/")
     maven(url = "https://repo.adeo.no/repository/maven-snapshots/")
     maven(url = "https://repo.adeo.no/repository/maven-releases/")
+    maven(url = "https://dl.bintray.com/kotlin/ktor")
 }
 
 group = "no.nav.dagpenger"
@@ -29,6 +30,7 @@ version = "0.1.3-SNAPSHOT"
 val kafkaVersion = "2.0.0"
 val confluentVersion = "5.0.0"
 val kotlinLoggingVersion = "1.4.9"
+val ktorVersion = "0.9.5"
 
 dependencies {
     implementation(kotlin("stdlib"))
@@ -39,6 +41,7 @@ dependencies {
     api("io.confluent:kafka-streams-avro-serde:$confluentVersion")
 
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
+    implementation("io.ktor:ktor-server-netty:$ktorVersion")
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
