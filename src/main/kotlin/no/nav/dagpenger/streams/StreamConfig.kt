@@ -11,13 +11,11 @@ import java.io.File
 import java.lang.System.getenv
 import java.util.Properties
 
-
 private val bootstrapServersConfig = getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
 private val kafkaUserName: String? = getenv("KAFKA_USERNAME")
 private val kafkaUserPassword: String? = getenv("KAFKA_PASSWORD")
 
 private val LOGGER = KotlinLogging.logger {}
-
 
 fun streamConfig(
     appId: String,
