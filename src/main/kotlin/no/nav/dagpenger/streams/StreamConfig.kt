@@ -1,5 +1,6 @@
 package no.nav.dagpenger.streams
 
+import mu.KotlinLogging
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.config.SaslConfigs
@@ -7,17 +8,20 @@ import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.errors.LogAndFailExceptionHandler
 import java.io.File
-import java.lang.RuntimeException
 import java.lang.System.getenv
 import java.util.Properties
 
+
 private val bootstrapServersConfig = getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
+private val kafkaUserName: String? = getenv("KAFKA_USERNAME")
+private val kafkaUserPassword: String? = getenv("KAFKA_PASSWORD")
+
+private val LOGGER = KotlinLogging.logger {}
+
 
 fun streamConfig(
     appId: String,
-    stateDir: String? = null,
-    username: String? = null,
-    password: String? = null
+    stateDir: String? = null
 ): Properties {
     return Properties().apply {
         putAll(
@@ -36,7 +40,8 @@ fun streamConfig(
 
         stateDir?.let { put(StreamsConfig.STATE_DIR_CONFIG, stateDir) }
 
-        username?.let { name -> password.let { pwd ->
+        kafkaUserName?.let { name -> kafkaUserPassword.let { pwd ->
+            LOGGER.info { "Using user name $name to authenticate against Kafka brokers " }
             put(SaslConfigs.SASL_MECHANISM, "PLAIN")
             put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL")
             put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$name\" password=\"$pwd\";")
