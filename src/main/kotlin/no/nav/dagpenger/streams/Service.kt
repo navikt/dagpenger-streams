@@ -42,7 +42,7 @@ abstract class Service {
                 get("/isReady") {
                     call.respondText("READY", ContentType.Text.Plain)
                 }
-                get("/prometheus") {
+                get("/metrics") {
                     val names = call.request.queryParameters.getAll("name[]")?.toSet() ?: setOf()
                     call.respondTextWriter(ContentType.parse(TextFormat.CONTENT_TYPE_004)) {
                         TextFormat.write004(this, collectorRegistry.filteredMetricFamilySamples(names))
