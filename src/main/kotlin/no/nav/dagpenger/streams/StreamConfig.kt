@@ -11,7 +11,7 @@ import java.lang.RuntimeException
 import java.lang.System.getenv
 import java.util.Properties
 
-private val bootstrapServersConfig = getenv("KAFKA_BOOTSTRAP_SERVERS_URL") ?: "localhost:9092"
+private val bootstrapServersConfig = getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
 
 fun streamConfig(
     appId: String,

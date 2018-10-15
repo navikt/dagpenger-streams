@@ -31,6 +31,7 @@ val kafkaVersion = "2.0.0"
 val confluentVersion = "5.0.0"
 val kotlinLoggingVersion = "1.4.9"
 val ktorVersion = "0.9.5"
+val prometheusVersion = "0.5.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
@@ -42,6 +43,9 @@ dependencies {
 
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
+
+    implementation("io.prometheus:simpleclient_common:$prometheusVersion")
+    implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
