@@ -23,37 +23,39 @@ fun streamConfig(
 ): Properties {
     return Properties().apply {
         putAll(
-            listOf(
-                CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 1000,
-                CommonClientConfigs.RECONNECT_BACKOFF_MS_CONFIG to 5000,
-                StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServersConfig,
-                StreamsConfig.APPLICATION_ID_CONFIG to appId,
-                // TODO Using processing guarantee requires replication of 3, not possible with current single node dev environment
-                //StreamsConfig.PROCESSING_GUARANTEE_CONFIG to "exactly_once",
-                StreamsConfig.COMMIT_INTERVAL_MS_CONFIG to 1,
-                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
-                StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG to LogAndFailExceptionHandler::class.java
-            )
+                listOf(
+                        CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 1000,
+                        CommonClientConfigs.RECONNECT_BACKOFF_MS_CONFIG to 5000,
+                        StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServersConfig,
+                        StreamsConfig.APPLICATION_ID_CONFIG to appId,
+                        // TODO Using processing guarantee requires replication of 3, not possible with current single node dev environment
+                        //StreamsConfig.PROCESSING_GUARANTEE_CONFIG to "exactly_once",
+                        StreamsConfig.COMMIT_INTERVAL_MS_CONFIG to 1,
+                        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
+                        StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG to LogAndFailExceptionHandler::class.java
+                )
         )
 
         stateDir?.let { put(StreamsConfig.STATE_DIR_CONFIG, stateDir) }
 
-        kafkaUserName?.let { name -> kafkaUserPassword.let { pwd ->
-            LOGGER.info { "Using user name $name to authenticate against Kafka brokers " }
-            put(SaslConfigs.SASL_MECHANISM, "PLAIN")
-            put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL")
-            put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$name\" password=\"$pwd\";")
+        kafkaUserName?.let { name ->
+            kafkaUserPassword.let { pwd ->
+                LOGGER.info { "Using user name $name to authenticate against Kafka brokers " }
+                put(SaslConfigs.SASL_MECHANISM, "PLAIN")
+                put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL")
+                put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$name\" password=\"$pwd\";")
 
-            put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, trustStore())
-            put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, getenv("KAFKA_SSL_TRUSTSTORE_PASSWORD"))
-        } }
-    }
-}
-
-fun trustStore(): String {
-    try {
-        return File(ClassLoader.getSystemResource(getenv("KAFKA_SSL_TRUSTSTORE_LOCATION")).toURI()).absolutePath
-    } catch (e: Exception) {
-        throw RuntimeException("Failed to get trust store location from env KAFKA_SSL_TRUSTSTORE_LOCATION", e)
+                val trustStoreLocation = getenv("NAV_TRUSTSTORE_PATH")
+                trustStoreLocation?.let { ClassLoader.getSystemResource(it) }?.let {
+                    try {
+                        put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, File(it.toURI()).absolutePath)
+                        put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, getenv("NAV_TRUSTSTORE_PASSWORD"))
+                        LOGGER.info { "Configured '${SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG}' location " }
+                    } catch (e: Exception) {
+                        LOGGER.error { "Failed to set '${SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG}' location " }
+                    }
+                }
+            }
+        }
     }
 }
