@@ -46,9 +46,9 @@ fun streamConfig(
                 put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$name\" password=\"$pwd\";")
 
                 val trustStoreLocation = getenv("NAV_TRUSTSTORE_PATH")
-                trustStoreLocation?.let { ClassLoader.getSystemResource(it) }?.let {
+                trustStoreLocation?.let {
                     try {
-                        put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, File(it.toURI()).absolutePath)
+                        put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, File(it).absolutePath)
                         put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, getenv("NAV_TRUSTSTORE_PASSWORD"))
                         LOGGER.info { "Configured '${SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG}' location " }
                     } catch (e: Exception) {
