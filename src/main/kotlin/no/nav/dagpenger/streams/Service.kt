@@ -19,7 +19,7 @@ private val LOGGER = KotlinLogging.logger {}
 
 abstract class Service(private val username: String? = null, private val password: String? = null) {
     protected abstract val SERVICE_APP_ID: String
-    protected abstract val HTTP_PORT: Int
+    protected open val HTTP_PORT: Int  = 8080
     private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
 
     private lateinit var streams: KafkaStreams
