@@ -19,18 +19,13 @@ private val serdeConfig = mapOf(
 
 object Topics {
     val JOARK_EVENTS = Topic(
-            "aapen-dok-inngaaendeJournalpost-ny-v1-t6",
-            //        "aapen-dok-inngaaendeJournalpost-utgar-v1-t6",
-            //       "aapen-dok-inngaaendeJournalpost-temaEndret-v1-t6",
-            //      "aapen-dok-inngaaendeJournalpost-endeligJournalfort-v1-t6"
-
+            "journalfoeringHendelse-v1",
             keySerde = Serdes.String(),
             valueSerde = configureGenericAvroSerde()
     )
 
-    //
     val INNGÅENDE_JOURNALPOST = Topic(
-            "inngaaende_journalpost", // todo: topic name  ?
+            "privat-dagpenger-journalpost-mottatt-v1",
             keySerde = Serdes.String(),
             valueSerde = configureAvroSerde<Behov>()
     )

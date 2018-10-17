@@ -17,7 +17,7 @@ import java.util.Properties
 
 private val LOGGER = KotlinLogging.logger {}
 
-abstract class Service {
+abstract class Service(private val username: String? = null, private val password: String? = null) {
     protected abstract val SERVICE_APP_ID: String
     protected abstract val HTTP_PORT: Int
     private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
@@ -58,7 +58,7 @@ abstract class Service {
 
     // Override and extend the set of properties when needed
     fun getConfig(): Properties {
-        return streamConfig(SERVICE_APP_ID)
+        return streamConfig(SERVICE_APP_ID, username, password)
     }
 
     private fun addShutdownHook() {
