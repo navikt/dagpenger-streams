@@ -17,9 +17,9 @@ import java.util.Properties
 
 private val LOGGER = KotlinLogging.logger {}
 
-abstract class Service {
+abstract class Service() {
     protected abstract val SERVICE_APP_ID: String
-    protected abstract val HTTP_PORT: Int
+    protected open val HTTP_PORT: Int  = 8080
     private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
 
     private lateinit var streams: KafkaStreams
@@ -57,7 +57,7 @@ abstract class Service {
     }
 
     // Override and extend the set of properties when needed
-    fun getConfig(): Properties {
+    open fun getConfig(): Properties {
         return streamConfig(SERVICE_APP_ID)
     }
 

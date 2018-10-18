@@ -12,14 +12,14 @@ import java.lang.System.getenv
 import java.util.Properties
 
 private val bootstrapServersConfig = getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
-private val kafkaUserName: String? = getenv("KAFKA_USERNAME")
-private val kafkaUserPassword: String? = getenv("KAFKA_PASSWORD")
 
 private val LOGGER = KotlinLogging.logger {}
 
 fun streamConfig(
     appId: String,
-    stateDir: String? = null
+    stateDir: String? = null,
+    username: String? = null,
+    password: String? = null
 ): Properties {
     return Properties().apply {
         putAll(
@@ -38,8 +38,8 @@ fun streamConfig(
 
         stateDir?.let { put(StreamsConfig.STATE_DIR_CONFIG, stateDir) }
 
-        kafkaUserName?.let { name ->
-            kafkaUserPassword.let { pwd ->
+        username?.let { name ->
+            password?.let { pwd ->
                 LOGGER.info { "Using user name $name to authenticate against Kafka brokers " }
                 put(SaslConfigs.SASL_MECHANISM, "PLAIN")
                 put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL")
