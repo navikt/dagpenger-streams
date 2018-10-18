@@ -57,8 +57,8 @@ abstract class Service() {
     }
 
     // Override and extend the set of properties when needed
-    fun getConfig(): Properties {
-        return streamConfig(SERVICE_APP_ID, username, password)
+    open fun getConfig(): Properties {
+        return streamConfig(SERVICE_APP_ID)
     }
 
     private fun addShutdownHook() {
