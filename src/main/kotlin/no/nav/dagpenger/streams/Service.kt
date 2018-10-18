@@ -17,7 +17,7 @@ import java.util.Properties
 
 private val LOGGER = KotlinLogging.logger {}
 
-abstract class Service(private val username: String? = null, private val password: String? = null) {
+abstract class Service() {
     protected abstract val SERVICE_APP_ID: String
     protected open val HTTP_PORT: Int  = 8080
     private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
