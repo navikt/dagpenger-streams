@@ -32,6 +32,7 @@ val confluentVersion = "5.0.0"
 val kotlinLoggingVersion = "1.4.9"
 val ktorVersion = "0.9.5"
 val prometheusVersion = "0.5.0"
+val fuelVersion = "1.15.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
@@ -43,6 +44,8 @@ dependencies {
 
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("com.github.kittinunf.fuel:fuel:$fuelVersion")
+    implementation("com.github.kittinunf.fuel:fuel-gson:$fuelVersion")
 
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
@@ -50,6 +53,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
     testImplementation("junit:junit:4.12")
+    testImplementation("com.github.tomakehurst:wiremock:2.18.0")
 }
 
 publishing {
