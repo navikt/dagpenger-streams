@@ -14,12 +14,12 @@ import org.apache.kafka.streams.kstream.Produced
 
 private val serdeConfig = mapOf(
         AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to
-                (System.getenv("SCHEMA_REGISTRY_URL") ?: "http://localhost:8081")
+                (System.getenv("KAFKA_SCHEMA_REGISTRY_URL") ?: "http://localhost:8081")
 )
 
 object Topics {
     val JOARK_EVENTS = Topic(
-            "journalfoeringHendelse-v1",
+            "aapen-dok-journalfoering-v1",
             keySerde = Serdes.String(),
             valueSerde = configureGenericAvroSerde()
     )
