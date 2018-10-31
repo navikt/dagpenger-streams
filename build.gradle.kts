@@ -1,6 +1,6 @@
 plugins {
     id("java-library")
-   kotlin("jvm") version "1.2.70"
+    kotlin("jvm") version "1.2.70"
     id("com.diffplug.gradle.spotless") version "3.13.0"
     id("maven-publish")
 }
