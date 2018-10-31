@@ -30,7 +30,7 @@ repositories {
 }
 
 group = "no.nav.dagpenger"
-version = "0.1.9-SNAPSHOT"
+version = "0.1.10-SNAPSHOT"
 
 val kafkaVersion = "2.0.0"
 val confluentVersion = "5.0.0"
