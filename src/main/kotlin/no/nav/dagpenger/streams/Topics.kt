@@ -21,20 +21,21 @@ object Topics {
     val JOARK_EVENTS = Topic(
             "aapen-dok-journalfoering-v1",
             keySerde = Serdes.String(),
-            valueSerde = configureGenericAvroSerde()
+            valueSerde = configureGenericAvroSerde(serdeConfig)
     )
 
     val INNGÅENDE_JOURNALPOST = Topic(
             "privat-dagpenger-journalpost-mottatt-alpha",
             keySerde = Serdes.String(),
-            valueSerde = configureAvroSerde<Behov>()
+            valueSerde = configureAvroSerde<Behov>(serdeConfig)
     )
 }
-private fun configureGenericAvroSerde(): GenericAvroSerde {
+
+fun configureGenericAvroSerde(serdeConfig: Map<String, Any>): GenericAvroSerde {
     return GenericAvroSerde().apply { configure(serdeConfig, false) }
 }
 
-private fun <T : SpecificRecord?> configureAvroSerde(): SpecificAvroSerde<T> {
+fun <T : SpecificRecord?> configureAvroSerde(serdeConfig: Map<String, Any>): SpecificAvroSerde<T> {
     return SpecificAvroSerde<T>().apply { configure(serdeConfig, false) }
 }
 

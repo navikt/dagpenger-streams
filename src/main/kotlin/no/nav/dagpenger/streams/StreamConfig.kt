@@ -11,22 +11,20 @@ import java.io.File
 import java.lang.System.getenv
 import java.util.Properties
 
-private val bootstrapServersConfig = getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
-
 private val LOGGER = KotlinLogging.logger {}
 
 fun streamConfig(
-    appId: String,
-    stateDir: String? = null,
-    username: String? = null,
-    password: String? = null
+        appId: String,
+        bootStapServerUrl: String,
+        credential: KafkaCredential? = null,
+        stateDir: String? = null
 ): Properties {
     return Properties().apply {
         putAll(
                 listOf(
                         CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 1000,
                         CommonClientConfigs.RECONNECT_BACKOFF_MS_CONFIG to 5000,
-                        StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServersConfig,
+                        StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootStapServerUrl,
                         StreamsConfig.APPLICATION_ID_CONFIG to appId,
                         // TODO Using processing guarantee requires replication of 3, not possible with current single node dev environment
                         //StreamsConfig.PROCESSING_GUARANTEE_CONFIG to "exactly_once",
@@ -38,24 +36,24 @@ fun streamConfig(
 
         stateDir?.let { put(StreamsConfig.STATE_DIR_CONFIG, stateDir) }
 
-        username?.let { name ->
-            password?.let { pwd ->
-                LOGGER.info { "Using user name $name to authenticate against Kafka brokers " }
-                put(SaslConfigs.SASL_MECHANISM, "PLAIN")
-                put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL")
-                put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$name\" password=\"$pwd\";")
+        credential?.let { credential ->
+            LOGGER.info { "Using user name ${credential.username} to authenticate against Kafka brokers " }
+            put(SaslConfigs.SASL_MECHANISM, "PLAIN")
+            put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
+            put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${credential.username}\" password=\"${credential.password}\";")
 
-                val trustStoreLocation = getenv("NAV_TRUSTSTORE_PATH")
-                trustStoreLocation?.let {
-                    try {
-                        put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, File(it).absolutePath)
-                        put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, getenv("NAV_TRUSTSTORE_PASSWORD"))
-                        LOGGER.info { "Configured '${SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG}' location " }
-                    } catch (e: Exception) {
-                        LOGGER.error { "Failed to set '${SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG}' location " }
-                    }
+            val trustStoreLocation = getenv("NAV_TRUSTSTORE_PATH")
+            trustStoreLocation?.let {
+                try {
+                    put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL")
+                    put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, File(it).absolutePath)
+                    put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, getenv("NAV_TRUSTSTORE_PASSWORD"))
+                    LOGGER.info { "Configured '${SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG}' location " }
+                } catch (e: Exception) {
+                    LOGGER.error { "Failed to set '${SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG}' location " }
                 }
             }
         }
     }
+
 }

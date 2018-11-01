@@ -16,8 +16,9 @@ import org.apache.kafka.streams.KafkaStreams
 import java.util.Properties
 
 private val LOGGER = KotlinLogging.logger {}
+private val bootstrapServersConfig = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
 
-abstract class Service() {
+abstract class Service {
     protected abstract val SERVICE_APP_ID: String
     protected open val HTTP_PORT: Int = 8080
     private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
@@ -58,7 +59,7 @@ abstract class Service() {
 
     // Override and extend the set of properties when needed
     open fun getConfig(): Properties {
-        return streamConfig(SERVICE_APP_ID)
+        return streamConfig(SERVICE_APP_ID, bootstrapServersConfig)
     }
 
     private fun addShutdownHook() {
