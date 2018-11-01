@@ -25,7 +25,7 @@ object Topics {
     )
 
     val INNGÅENDE_JOURNALPOST = Topic(
-            "privat-dagpenger-journalpost-mottatt-v1",
+            "privat-dagpenger-journalpost-mottatt-alpha",
             keySerde = Serdes.String(),
             valueSerde = configureAvroSerde<Behov>()
     )
