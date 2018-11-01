@@ -14,10 +14,10 @@ import java.util.Properties
 private val LOGGER = KotlinLogging.logger {}
 
 fun streamConfig(
-        appId: String,
-        bootStapServerUrl: String,
-        credential: KafkaCredential? = null,
-        stateDir: String? = null
+    appId: String,
+    bootStapServerUrl: String,
+    credential: KafkaCredential? = null,
+    stateDir: String? = null
 ): Properties {
     return Properties().apply {
         putAll(
@@ -55,5 +55,4 @@ fun streamConfig(
             }
         }
     }
-
 }
