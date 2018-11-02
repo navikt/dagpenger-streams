@@ -26,7 +26,7 @@ class StsOidcClientTest {
     @Test
     fun `fetch open id token from sts server`() {
 
-        stubFor(WireMock.get(WireMock.urlEqualTo("/stsurl?grant_type=client_credentials&scope=openid"))
+        stubFor(WireMock.get(WireMock.urlEqualTo("/rest/v1/sts/token/?grant_type=client_credentials&scope=openid"))
                 .withHeader("Authorization", RegexPattern("Basic\\s[a-zA-Z0-9]*="))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
@@ -34,7 +34,7 @@ class StsOidcClientTest {
                 )
         )
 
-        val stsOidcClient = StsOidcClient(wireMockRule.url("stsurl"), "username", "password")
+        val stsOidcClient = StsOidcClient(wireMockRule.url(""), "username", "password")
         val oidcToken: OidcToken = stsOidcClient.oidcToken()
 
         assertEquals(oidcToken, OidcToken("token", "openid", expires))
@@ -43,7 +43,7 @@ class StsOidcClientTest {
     @Test
     fun `fetch open id token from sts server and token is cached `() {
 
-        stubFor(WireMock.get(WireMock.urlEqualTo("/cached?grant_type=client_credentials&scope=openid"))
+        stubFor(WireMock.get(WireMock.urlEqualTo("/cached/rest/v1/sts/token/?grant_type=client_credentials&scope=openid"))
                 .withHeader("Authorization", RegexPattern("Basic\\s[a-zA-Z0-9]*="))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
@@ -60,7 +60,7 @@ class StsOidcClientTest {
 
         assertEquals(secondCall, OidcToken("token", "openid", expires))
 
-        verify(exactly(1), getRequestedFor(urlEqualTo("/cached?grant_type=client_credentials&scope=openid"))
+        verify(exactly(1), getRequestedFor(urlEqualTo("/cached/rest/v1/sts/token/?grant_type=client_credentials&scope=openid"))
                 .withHeader("Authorization", RegexPattern("Basic\\s[a-zA-Z0-9]*=")))
     }
 

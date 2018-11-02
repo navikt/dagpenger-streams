@@ -6,10 +6,11 @@ import com.github.kittinunf.result.Result
 import java.time.Duration
 import java.time.LocalDateTime.now
 
-class StsOidcClient(private val stsUrl: String, private val username: String, private val password: String) : OidcClient {
-    private val EXPIRE_TIME_TO_REFRESH: Long = 60
+class StsOidcClient(private val stsBaseUrl: String, private val username: String, private val password: String) : OidcClient {
+    private val timeToRefresh: Long = 60
+    private val stsTokenUrl: String = if(stsBaseUrl.endsWith("/"))  "${stsBaseUrl}rest/v1/sts/token/" else "$stsBaseUrl/rest/v1/sts/token/"
 
-    @Volatile private var tokenExpiryTime = now().minus(Duration.ofSeconds(EXPIRE_TIME_TO_REFRESH))
+    @Volatile private var tokenExpiryTime = now().minus(Duration.ofSeconds(timeToRefresh))
 
     @Volatile private lateinit var oidcToken: OidcToken
 
@@ -18,7 +19,7 @@ class StsOidcClient(private val stsUrl: String, private val username: String, pr
             oidcToken
         } else {
             oidcToken = newOidcToken()
-            tokenExpiryTime = now().plus(Duration.ofSeconds(oidcToken.expires_in - EXPIRE_TIME_TO_REFRESH))
+            tokenExpiryTime = now().plus(Duration.ofSeconds(oidcToken.expires_in - timeToRefresh))
             oidcToken
         }
     }
@@ -28,7 +29,7 @@ class StsOidcClient(private val stsUrl: String, private val username: String, pr
                 "grant_type" to "client_credentials",
                 "scope" to "openid"
         )
-        val (_, response, result) = with(stsUrl.httpGet(parameters)) {
+        val (_, response, result) = with(stsTokenUrl.httpGet(parameters)) {
             authenticate(username, password)
             responseObject<OidcToken>()
         }
