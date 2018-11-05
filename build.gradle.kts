@@ -30,7 +30,7 @@ repositories {
 }
 
 group = "no.nav.dagpenger"
-version = "0.2.0-SNAPSHOT"
+version = "0.2.1-SNAPSHOT"
 
 val kafkaVersion = "2.0.0"
 val confluentVersion = "5.0.0"
@@ -41,7 +41,7 @@ val fuelVersion = "1.15.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("no.nav.dagpenger:events:0.1.6-SNAPSHOT")
+    implementation("no.nav.dagpenger:events:0.1.7-SNAPSHOT")
 
     api("org.apache.kafka:kafka-clients:$kafkaVersion")
     api("org.apache.kafka:kafka-streams:$kafkaVersion")
