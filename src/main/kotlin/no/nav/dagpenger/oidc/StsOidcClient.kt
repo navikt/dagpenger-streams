@@ -6,7 +6,7 @@ import com.github.kittinunf.result.Result
 import java.time.Duration
 import java.time.LocalDateTime.now
 
-class StsOidcClient(private val stsBaseUrl: String, private val username: String, private val password: String) : OidcClient {
+class StsOidcClient(stsBaseUrl: String, private val username: String, private val password: String) : OidcClient {
     private val timeToRefresh: Long = 60
     private val stsTokenUrl: String = if (stsBaseUrl.endsWith("/")) "${stsBaseUrl}rest/v1/sts/token/" else "$stsBaseUrl/rest/v1/sts/token/"
 

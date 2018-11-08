@@ -3,6 +3,7 @@ plugins {
     kotlin("jvm") version "1.2.70"
     id("com.diffplug.gradle.spotless") version "3.13.0"
     id("maven-publish")
+    id("info.solidsoft.pitest") version "1.3.0"
 }
 
 buildscript {
@@ -17,6 +18,7 @@ buildscript {
 apply {
     plugin("com.diffplug.gradle.spotless")
     plugin("com.cinnober.gradle.semver-git")
+    plugin("info.solidsoft.pitest")
 }
 
 repositories {
@@ -90,3 +92,11 @@ spotless {
         ktlint()
     }
 }
+
+pitest {
+    threads = 4
+    coverageThreshold = 80
+    avoidCallsTo = setOf("kotlin.jvm.internal")
+}
+
+tasks.getByName("check").dependsOn("pitest")

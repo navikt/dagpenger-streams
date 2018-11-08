@@ -11,6 +11,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.github.tomakehurst.wiremock.matching.RegexPattern
 import no.nav.dagpenger.oidc.OidcToken
 import no.nav.dagpenger.oidc.StsOidcClient
+import no.nav.dagpenger.oidc.StsOidcClientException
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -62,6 +63,21 @@ class StsOidcClientTest {
 
         verify(exactly(1), getRequestedFor(urlEqualTo("/cached/rest/v1/sts/token/?grant_type=client_credentials&scope=openid"))
                 .withHeader("Authorization", RegexPattern("Basic\\s[a-zA-Z0-9]*=")))
+    }
+
+    @Test(expected = StsOidcClientException::class)
+    fun `fetch open id token from sts on server error`() {
+
+        stubFor(WireMock.get(WireMock.urlEqualTo("/rest/v1/sts/token/?grant_type=client_credentials&scope=openid"))
+            .withHeader("Authorization", RegexPattern("Basic\\s[a-zA-Z0-9]*="))
+            .willReturn(WireMock.serverError()
+                .withHeader("Content-Type", "text/plain")
+                .withBody("FAILED")
+            )
+        )
+
+        val stsOidcClient = StsOidcClient(wireMockRule.url(""), "username", "password")
+        stsOidcClient.oidcToken()
     }
 
     fun body() = """
