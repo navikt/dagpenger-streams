@@ -60,7 +60,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
     testImplementation("junit:junit:4.12")
-    testImplementation("com.github.tomakehurst:wiremock:2.18.0")
+    testImplementation("com.github.tomakehurst:wiremock:2.19.0")
 }
 
 publishing {
@@ -95,6 +95,7 @@ spotless {
 
 pitest {
     threads = 4
+    pitestVersion = "1.4.3"
     coverageThreshold = 80
     avoidCallsTo = setOf("kotlin.jvm.internal")
 }
