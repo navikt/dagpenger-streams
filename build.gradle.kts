@@ -63,10 +63,44 @@ dependencies {
     testImplementation("com.github.tomakehurst:wiremock:2.19.0")
 }
 
+
+val sourcesJar by tasks.registering(Jar::class) {
+    classifier = "sources"
+    from(sourceSets["main"].allSource)
+}
+
 publishing {
     publications {
         create("default", MavenPublication::class.java) {
             from(components["java"])
+            artifact(sourcesJar.get())
+
+            pom {
+                name.set("dagpenger-events")
+                description.set("")
+                url.set("https://github.com/navikt/dagpenger-streams")
+                withXml {
+                    asNode().appendNode("packaging", "jar")
+                }
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        name.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                developers {
+                    developer {
+                        organization.set("NAV (Arbeids- og velferdsdirektoratet) - The Norwegian Labour and Welfare Administration")
+                        organizationUrl.set("https://www.nav.no")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:git:git://github.com/navikt/dagpenger-streams.git")
+                    developerConnection.set("scm:git:git://github.com/navikt/dagpenger-streams.git")
+                    url.set("https://github.com/navikt/dagpenger-streams")
+                }
+            }
         }
     }
 
