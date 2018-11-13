@@ -2,11 +2,26 @@ language: java
 jdk:
 - openjdk11
 script:
-- "./gradlew -version"
+- "./gradlew build"
 env:
   global:
+  - OSSRH_JIRA_USERNAME=navikt
+  - GPG_KEY_NAME=navikt
   - secure: ew6bJiQF1rh26AnXodI7SVXWxEjnjvaO+VIU+XF+IY1cV7baWRvV8xZELXJ2XpG7P2Lt/ZkMT7juvDrg0ARr8SHwM6p3ubUmBi7XMT9GxVMsnCQqwK8X5/r/MGpahv95R4W6YHmN0++t6OHHeveyMyOeanc77k2vgHvMAaAXzW6OF5l9Tzb14/HCJ4BQsPUuUxBIeTX7qRJV423WuYEilfjgGkH2D9z9k6nQH8X8B5XKFuO6JZRTywRolVi/ylZ4hWQ2NQQL7HoFIFovkxFTqrF2ybHXOIduNPcrpagG3w4CEg6LVuTKIwtsBR04f9CsiUB4OLgnTLxX47/Ar8p4hougnOICNn4I9E/SWzap4/r/CoRWf0PNM8dWDrYbGkiK23k0NR3hXUgXz0f3fgngPvwbKcydaeiszoWkaPdCj23WNmPe9u3JglLqw14Dm720jM0HnTztbf0igbC3QGDNerEX/BpttwjG15VtPfFtTc6h9rcCymI5kEUCGZyC+4HGNRMwXz1Hs2x2mwUm3gM09AmTdqAuohQ/LeEVC2WmEmMjPE2okLnUk77iZckIW4ENZCBjqky93hDWB/hTUziyXZJvxBRsom1Oa1JrUKvV1rR5Z0NRKlUJMUNYGuRF8v5EC+FycXwwj4MhPfOETpiN3dbC/7DMF4y+uKG89LrWYsc=
   - secure: jC8nkoDJbJmhzPq9n0T6bHNumO9VoeLeQ/BqUwUTXi0D3TOseGa7uZtAojktOV4E3zSsLEU4RQUKoWSQvJB00mcBHhWAAM2eStG+/+QOBlNq7Y0+5G59lJKE4nj+g6F7iExWNJKoueFmCRdqMEULlBH0nwZyLTMRKT+pibaWHjnsV/9FmQVL5JatM6AEznGMRHeMpO6KpFszskuCMm2O5YZDXsRxqpbB3STLGeaPUAduMND586tsQnP7/wrO2jDyvAm0/85ChzMCj1j/QJBUkhsLBxUc4V9eTNn/fVii7HPXAFaBcqxR1DxmrTwfyDSDKdovNWA2CmTLo9Mt+Oejsn5CvxMD1tBJDLETlK0WTJm5gkYBSezaWQMoOZ0BkufhsrHMmAbMx2h8hwXMnkw49tYs52OU9pVZxMmVEl0RcyKMVtzjXknoJEfJpNfyQB58hVpJG8drmlk7wWLy93enC6JB4YutOEUbTsZnIw9zR0FUDyBK7WwF5mfaodq6XNJ7yj2Pzx+Y/5HRMGSIJqHlo9qnEcw3MP6OKZm4hvrTtdqDDsZJ2yRFj0t+c8kEVc6kDT8qNpveJnUZDBJh0bDcgxRMAt/FYGpNqsNTXZoZ56CElQTBQ4p4A3gZlwec3usb4K8Q05EZDKHCCM/LgdQOykU3/EYk1ARKO+BUvQWWju0=
 before_install:
 - openssl aes-256-cbc -K $encrypted_21c0c7456400_key -iv $encrypted_21c0c7456400_iv
   -in codesigning.asc.enc -out travis/codesigning.asc -d
+- gpg --fast-import travis/codesigning.asc
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
+deploy:
+  provider: script
+  script: "./gradlew publish --info --stacktrace getStagingProfile"
+  on:
+    branch: master

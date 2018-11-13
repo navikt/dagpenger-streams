@@ -4,6 +4,7 @@ plugins {
     id("com.diffplug.gradle.spotless") version "3.13.0"
     id("maven-publish")
     id("info.solidsoft.pitest") version "1.3.0"
+    id("signing")
 }
 
 buildscript {
@@ -17,18 +18,16 @@ buildscript {
 
 apply {
     plugin("com.diffplug.gradle.spotless")
-    plugin("com.cinnober.gradle.semver-git")
     plugin("info.solidsoft.pitest")
 }
 
 repositories {
-    maven("https://repo.adeo.no/repository/maven-central")
+    mavenCentral()
     maven("http://packages.confluent.io/maven/")
     maven("https://dl.bintray.com/kotlin/ktor")
     maven("https://dl.bintray.com/kotlin/kotlinx")
     maven("https://dl.bintray.com/kittinunf/maven")
-    maven("https://repo.adeo.no/repository/maven-snapshots/")
-    maven("https://repo.adeo.no/repository/maven-releases/")
+    maven("https://oss.sonatype.org/content/repositories/snapshots/")
 }
 
 group = "no.nav.dagpenger"
@@ -43,7 +42,7 @@ val fuelVersion = "1.15.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("no.nav.dagpenger:events:0.1.7-SNAPSHOT")
+    implementation("no.nav.dagpenger:events:0.1.8-SNAPSHOT")
 
     api("org.apache.kafka:kafka-clients:$kafkaVersion")
     api("org.apache.kafka:kafka-streams:$kafkaVersion")
@@ -63,7 +62,6 @@ dependencies {
     testImplementation("com.github.tomakehurst:wiremock:2.19.0")
 }
 
-
 val sourcesJar by tasks.registering(Jar::class) {
     classifier = "sources"
     from(sourceSets["main"].allSource)
@@ -71,7 +69,7 @@ val sourcesJar by tasks.registering(Jar::class) {
 
 publishing {
     publications {
-        create("default", MavenPublication::class.java) {
+        create("mavenJava", MavenPublication::class.java) {
             from(components["java"])
             artifact(sourcesJar.get())
 
@@ -106,15 +104,27 @@ publishing {
 
     repositories {
         maven {
+            credentials {
+                username = System.getenv("OSSRH_JIRA_USERNAME")
+                password = System.getenv("OSSRH_JIRA_PASSWORD")
+            }
             val version = project.version as String
-
             url = if (version.endsWith("-SNAPSHOT")) {
-                uri("https://repo.adeo.no/repository/maven-snapshots/")
+                uri("https://oss.sonatype.org/content/repositories/snapshots")
             } else {
-                uri("https://repo.adeo.no/repository/maven-releases/")
+                uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
             }
         }
     }
+}
+
+ext["signing.gnupg.keyName"] = System.getenv("GPG_KEY_NAME")
+ext["signing.gnupg.passphrase"] = System.getenv("GPG_PASSPHRASE")
+ext["signing.gnupg.useLegacyGpg"] = true
+
+signing {
+    useGpgCmd()
+    sign(publishing.publications["mavenJava"])
 }
 
 spotless {
