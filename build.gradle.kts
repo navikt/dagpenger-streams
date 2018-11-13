@@ -5,6 +5,7 @@ plugins {
     id("maven-publish")
     id("info.solidsoft.pitest") version "1.3.0"
     id("signing")
+    id("io.codearte.nexus-staging") version "0.12.0"
 }
 
 buildscript {
@@ -125,6 +126,13 @@ ext["signing.gnupg.useLegacyGpg"] = true
 signing {
     useGpgCmd()
     sign(publishing.publications["mavenJava"])
+}
+
+
+nexusStaging {
+    username = System.getenv("OSSRH_JIRA_USERNAME")
+    password = System.getenv("OSSRH_JIRA_PASSWORD")
+    packageGroup = "no.nav"
 }
 
 spotless {
