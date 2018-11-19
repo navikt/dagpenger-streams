@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("java-library")
     kotlin("jvm") version "1.2.70"
@@ -29,6 +31,10 @@ repositories {
     maven("https://dl.bintray.com/kotlin/kotlinx")
     maven("https://dl.bintray.com/kittinunf/maven")
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
 }
 
 group = "no.nav.dagpenger"
