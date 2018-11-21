@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("java-library")
-    kotlin("jvm") version "1.2.70"
+    kotlin("jvm") version "1.3.10"
     id("com.diffplug.gradle.spotless") version "3.13.0"
     id("maven-publish")
     id("info.solidsoft.pitest") version "1.3.0"
@@ -43,7 +43,7 @@ version = "0.2.1-SNAPSHOT"
 val kafkaVersion = "2.0.0"
 val confluentVersion = "5.0.0"
 val kotlinLoggingVersion = "1.4.9"
-val ktorVersion = "0.9.5"
+val ktorVersion = "1.0.0"
 val prometheusVersion = "0.5.0"
 val fuelVersion = "1.15.0"
 
