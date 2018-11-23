@@ -5,7 +5,6 @@ plugins {
     kotlin("jvm") version "1.3.10"
     id("com.diffplug.gradle.spotless") version "3.13.0"
     id("maven-publish")
-    id("info.solidsoft.pitest") version "1.3.0"
     id("signing")
     id("io.codearte.nexus-staging") version "0.12.0"
 }
@@ -21,7 +20,6 @@ buildscript {
 
 apply {
     plugin("com.diffplug.gradle.spotless")
-    plugin("info.solidsoft.pitest")
 }
 
 repositories {
@@ -38,7 +36,7 @@ tasks.withType<KotlinCompile> {
 }
 
 group = "no.nav.dagpenger"
-version = "0.2.1-SNAPSHOT"
+version = "0.2.2-SNAPSHOT"
 
 val kafkaVersion = "2.0.0"
 val confluentVersion = "5.0.0"
@@ -149,12 +147,3 @@ spotless {
         ktlint()
     }
 }
-
-pitest {
-    threads = 4
-    pitestVersion = "1.4.3"
-    coverageThreshold = 80
-    avoidCallsTo = setOf("kotlin.jvm.internal")
-}
-
-tasks.getByName("check").dependsOn("pitest")
