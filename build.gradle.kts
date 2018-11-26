@@ -1,25 +1,16 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("java-library")
-    kotlin("jvm") version "1.2.70"
+    kotlin("jvm") version "1.3.10"
     id("com.diffplug.gradle.spotless") version "3.13.0"
     id("maven-publish")
-    id("info.solidsoft.pitest") version "1.3.0"
     id("signing")
     id("io.codearte.nexus-staging") version "0.12.0"
 }
 
-buildscript {
-    repositories {
-        maven("https://repo.adeo.no/repository/maven-central")
-    }
-    dependencies {
-        classpath("com.cinnober.gradle:semver-git:2.2.0")
-    }
-}
-
 apply {
     plugin("com.diffplug.gradle.spotless")
-    plugin("info.solidsoft.pitest")
 }
 
 repositories {
@@ -31,19 +22,23 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
 }
 
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
 group = "no.nav.dagpenger"
-version = "0.2.1-SNAPSHOT"
+version = "0.2.2-SNAPSHOT"
 
 val kafkaVersion = "2.0.0"
 val confluentVersion = "5.0.0"
 val kotlinLoggingVersion = "1.4.9"
-val ktorVersion = "0.9.5"
+val ktorVersion = "1.0.0"
 val prometheusVersion = "0.5.0"
 val fuelVersion = "1.15.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("no.nav.dagpenger:events:0.1.8-SNAPSHOT")
+    implementation("no.nav.dagpenger:events:0.1.9-SNAPSHOT")
 
     api("org.apache.kafka:kafka-clients:$kafkaVersion")
     api("org.apache.kafka:kafka-streams:$kafkaVersion")
@@ -143,12 +138,3 @@ spotless {
         ktlint()
     }
 }
-
-pitest {
-    threads = 4
-    pitestVersion = "1.4.3"
-    coverageThreshold = 80
-    avoidCallsTo = setOf("kotlin.jvm.internal")
-}
-
-tasks.getByName("check").dependsOn("pitest")

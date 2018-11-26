@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/navikt/dagpenger-streams.svg?branch=master)](https://travis-ci.org/navikt/dagpenger-streams)
+
 # Streams
 
 A tiny convenience library for building Kafka Streams based services.
