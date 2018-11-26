@@ -47,7 +47,7 @@ val fuelVersion = "1.15.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("no.nav.dagpenger:events:0.1.6-SNAPSHOT")
+    implementation("no.nav.dagpenger:events:0.1.9-SNAPSHOT")
 
     api("org.apache.kafka:kafka-clients:$kafkaVersion")
     api("org.apache.kafka:kafka-streams:$kafkaVersion")
