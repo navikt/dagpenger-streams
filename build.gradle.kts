@@ -9,12 +9,6 @@ plugins {
     id("io.codearte.nexus-staging") version "0.12.0"
 }
 
-buildscript {
-    repositories {
-        maven("https://repo.adeo.no/repository/maven-central")
-    }
-}
-
 apply {
     plugin("com.diffplug.gradle.spotless")
 }
