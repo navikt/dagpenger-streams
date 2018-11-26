@@ -13,9 +13,6 @@ buildscript {
     repositories {
         maven("https://repo.adeo.no/repository/maven-central")
     }
-    dependencies {
-        classpath("com.cinnober.gradle:semver-git:2.2.0")
-    }
 }
 
 apply {
