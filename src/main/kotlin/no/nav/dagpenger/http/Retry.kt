@@ -36,4 +36,4 @@ fun <T : Any> retryFuelHttp(
     return function()
 }
 
-private fun Logger.warn(exception: Throwable) = error(exception.message ?: "Exception of type ${exception.javaClass}", exception)
+private fun Logger.warn(exception: Throwable) = warn(exception.message ?: "Exception of type ${exception.javaClass}", exception)
