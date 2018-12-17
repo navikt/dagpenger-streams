@@ -30,6 +30,7 @@ abstract class Service {
     fun start() {
         DefaultExports.initialize()
         applicationEngine = naisHttpChecks()
+        applicationEngine.start(wait = false)
         streams = setupStreamsInternal()
         streams.start()
         LOGGER.info("Started Service $SERVICE_APP_ID")
@@ -46,7 +47,7 @@ abstract class Service {
     }
 
     private fun naisHttpChecks(): ApplicationEngine {
-        val applicationEngine = embeddedServer(Netty, HTTP_PORT) {
+        return embeddedServer(Netty, HTTP_PORT) {
             routing {
                 get("/isAlive") {
                     call.respondText("ALIVE", ContentType.Text.Plain)
@@ -62,11 +63,6 @@ abstract class Service {
                 }
             }
         }
-        Runtime.getRuntime().addShutdownHook(Thread {
-            applicationEngine.stop(gracePeriod = 3, timeout = 5, timeUnit = TimeUnit.SECONDS)
-        })
-        applicationEngine.start(wait = false)
-        return applicationEngine
     }
 
     fun stop() {
