@@ -6,6 +6,7 @@ import io.ktor.response.respondText
 import io.ktor.response.respondTextWriter
 import io.ktor.routing.get
 import io.ktor.routing.routing
+import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.prometheus.client.CollectorRegistry
@@ -14,6 +15,7 @@ import io.prometheus.client.hotspot.DefaultExports
 import mu.KotlinLogging
 import org.apache.kafka.streams.KafkaStreams
 import java.util.Properties
+import java.util.concurrent.TimeUnit
 
 private val LOGGER = KotlinLogging.logger {}
 private val bootstrapServersConfig = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
@@ -24,18 +26,27 @@ abstract class Service {
     private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
 
     private lateinit var streams: KafkaStreams
+    private lateinit var applicationEngine: ApplicationEngine
     fun start() {
         DefaultExports.initialize()
-        naisHttpChecks()
-        streams = setupStreams()
+        applicationEngine = naisHttpChecks()
+        streams = setupStreamsInternal()
         streams.start()
-
         LOGGER.info("Started Service $SERVICE_APP_ID")
-        addShutdownHook()
+        addShutdownHooks()
     }
 
-    private fun naisHttpChecks() {
-        embeddedServer(Netty, HTTP_PORT) {
+    private fun setupStreamsInternal(): KafkaStreams {
+        val streams = setupStreams()
+        streams.setUncaughtExceptionHandler { t, e ->
+            logUnexpectedError(t, e)
+            stop()
+        }
+        return streams
+    }
+
+    private fun naisHttpChecks(): ApplicationEngine {
+        val applicationEngine = embeddedServer(Netty, HTTP_PORT) {
             routing {
                 get("/isAlive") {
                     call.respondText("ALIVE", ContentType.Text.Plain)
@@ -50,11 +61,19 @@ abstract class Service {
                     }
                 }
             }
-        }.start(wait = false)
+        }
+        Runtime.getRuntime().addShutdownHook(Thread {
+            applicationEngine.stop(gracePeriod = 3, timeout = 5, timeUnit = TimeUnit.SECONDS)
+        })
+        applicationEngine.start(wait = false)
+        return applicationEngine
     }
 
     fun stop() {
-        streams.close()
+        LOGGER.info { "Shutting down $SERVICE_APP_ID" }
+        streams.close(3, TimeUnit.SECONDS)
+        streams.cleanUp()
+        applicationEngine.stop(gracePeriod = 3, timeout = 5, timeUnit = TimeUnit.SECONDS)
     }
 
     // Override and extend the set of properties when needed
@@ -62,14 +81,19 @@ abstract class Service {
         return streamConfig(SERVICE_APP_ID, bootstrapServersConfig)
     }
 
-    private fun addShutdownHook() {
-        Thread.currentThread().setUncaughtExceptionHandler { _, _ -> stop() }
-        Runtime.getRuntime().addShutdownHook(Thread {
-            //try {
-                stop()
-            /*} catch (ignored: Exception) {
-            }*/
-        })
+    private fun addShutdownHooks() {
+        Thread.currentThread().setUncaughtExceptionHandler { t, e ->
+            logUnexpectedError(t, e)
+            stop()
+        }
+        Runtime.getRuntime().addShutdownHook(Thread { stop() })
     }
+
+    private fun logUnexpectedError(t: Thread?, e: Throwable) {
+        LOGGER.error(
+            "Uncaught exception in $SERVICE_APP_ID stream, thread: $t message:  ${e.message}", e
+        )
+    }
+
     protected abstract fun setupStreams(): KafkaStreams
 }
