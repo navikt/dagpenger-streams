@@ -59,28 +59,28 @@ class ServiceTest {
 
     @Test
     fun `Should have http alive check`() {
-        val (_, response, _) = with("http://localhost:$httpPort/isAlive".httpGet()) {
+        val (_, response, result) = with("http://localhost:$httpPort/isAlive".httpGet()) {
             responseString()
         }
 
-        assertTrue { response.isSuccessful }
+        assertTrue("should have isAlive endpoint but was $result") { response.isSuccessful }
     }
 
     @Test
     fun `Should have http ready check`() {
-        val (_, response, _) = with("http://localhost:$httpPort/isReady".httpGet()) {
+        val (_, response, result) = with("http://localhost:$httpPort/isReady".httpGet()) {
             responseString()
         }
 
-        assertTrue { response.isSuccessful }
+        assertTrue("should have isReady endpoint but was $result") { response.isSuccessful }
     }
 
     @Test
     fun `Should have http metrics endpoint check`() {
-        val (_, response, _) = with("http://localhost:$httpPort/metrics".httpGet()) {
+        val (_, response, result) = with("http://localhost:$httpPort/metrics".httpGet()) {
             responseString()
         }
 
-        assertTrue { response.isSuccessful }
+        assertTrue("should have metrics endpoint but was $result") { response.isSuccessful }
     }
 }
