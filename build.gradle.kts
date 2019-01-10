@@ -49,8 +49,8 @@ dependencies {
     implementation("com.github.kittinunf.fuel:fuel:$fuelVersion")
     implementation("com.github.kittinunf.fuel:fuel-gson:$fuelVersion")
 
-    implementation("io.prometheus:simpleclient_common:$prometheusVersion")
-    implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
+    api("io.prometheus:simpleclient_common:$prometheusVersion")
+    api("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
