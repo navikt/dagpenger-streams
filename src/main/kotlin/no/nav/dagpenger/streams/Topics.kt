@@ -32,8 +32,8 @@ object Topics {
         valueSerde = avroBehovSerde
     )
 
-    val REGEL_EVENTS = Topic(
-        "privat-dagpenger-regel-alpha",
+    val VILKÅR_EVENT = Topic(
+        "privat-dagpenger-vilkar",
         keySerde = strings,
         valueSerde = avroRegelbehovSerde
     )
