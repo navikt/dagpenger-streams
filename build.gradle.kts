@@ -33,7 +33,7 @@ val kafkaVersion = "2.0.0"
 val confluentVersion = "5.0.0"
 val kotlinLoggingVersion = "1.4.9"
 val ktorVersion = "1.0.0"
-val prometheusVersion = "0.5.0"
+val prometheusVersion = "0.6.0"
 val fuelVersion = "1.15.0"
 
 dependencies {
