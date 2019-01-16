@@ -5,7 +5,7 @@ import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
 import no.nav.dagpenger.events.avro.Behov
-import no.nav.dagpenger.events.avro.Regelbehov
+import no.nav.dagpenger.events.avro.Vilkår
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.specific.SpecificRecord
 import org.apache.kafka.common.serialization.Serdes
@@ -16,7 +16,7 @@ import org.apache.kafka.streams.kstream.Produced
 
 private val strings = Serdes.String()
 private val avroBehovSerde = SpecificAvroSerde<Behov>()
-private val avroRegelbehovSerde = SpecificAvroSerde<Regelbehov>()
+private val avroVilkårSerde = SpecificAvroSerde<Vilkår>()
 private val genericAvro = GenericAvroSerde()
 
 object Topics {
@@ -33,9 +33,9 @@ object Topics {
     )
 
     val VILKÅR_EVENT = Topic(
-        "privat-dagpenger-vilkar",
+        "privat-dagpenger-vilkår-alpha",
         keySerde = strings,
-        valueSerde = avroRegelbehovSerde
+        valueSerde = avroVilkårSerde
     )
 }
 
