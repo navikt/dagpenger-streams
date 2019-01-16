@@ -70,7 +70,7 @@ publishing {
             artifact(sourcesJar.get())
 
             pom {
-                name.set("dagpenger-events")
+                name.set("dagpenger-streams")
                 description.set("")
                 url.set("https://github.com/navikt/dagpenger-streams")
                 withXml {
