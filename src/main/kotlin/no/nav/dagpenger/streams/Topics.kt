@@ -33,7 +33,7 @@ object Topics {
     )
 
     val VILKÅR_EVENT = Topic(
-        "privat-dagpenger-vilkår-alpha",
+        "privat-dagpenger-vilkar-alpha",
         keySerde = strings,
         valueSerde = avroVilkårSerde
     )
