@@ -22,7 +22,7 @@ cache:
     - "$HOME/.gradle/wrapper/"
 deploy:
   provider: script
-  script: "./gradlew publish --info --stacktrace getStagingProfile"
+  script: "./gradlew publishToNexus --info --stacktrace getStagingProfile"
   on:
     branch: master
 notifications:

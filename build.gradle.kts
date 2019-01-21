@@ -6,7 +6,8 @@ plugins {
     id("com.diffplug.gradle.spotless") version "3.13.0"
     id("maven-publish")
     id("signing")
-    id("io.codearte.nexus-staging") version "0.12.0"
+    id("io.codearte.nexus-staging") version "0.20.0"
+    id("de.marcphilipp.nexus-publish") version "0.1.1"
 }
 
 apply {
@@ -127,6 +128,7 @@ nexusStaging {
     username = System.getenv("OSSRH_JIRA_USERNAME")
     password = System.getenv("OSSRH_JIRA_PASSWORD")
     packageGroup = "no.nav"
+    stagingProfileId = "3a10cafa813c47"
 }
 
 spotless {
