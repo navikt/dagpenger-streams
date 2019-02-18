@@ -28,7 +28,7 @@ tasks.withType<KotlinCompile> {
 }
 
 group = "no.nav.dagpenger"
-version = "0.2.5-SNAPSHOT"
+version = "0.2.6-SNAPSHOT"
 
 val kafkaVersion = "2.0.0"
 val confluentVersion = "5.0.0"
