@@ -36,6 +36,8 @@ val kotlinLoggingVersion = "1.6.22"
 val ktorVersion = "1.0.0"
 val prometheusVersion = "0.6.0"
 val fuelVersion = "1.15.0"
+val orgJsonVersion = "20180813"
+val jupiterVersion = "5.3.2"
 
 dependencies {
     implementation(kotlin("stdlib"))
@@ -44,6 +46,7 @@ dependencies {
     api("org.apache.kafka:kafka-clients:$kafkaVersion")
     api("org.apache.kafka:kafka-streams:$kafkaVersion")
     api("io.confluent:kafka-streams-avro-serde:$confluentVersion")
+    implementation("org.json:json:$orgJsonVersion")
 
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -55,6 +58,10 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:$jupiterVersion")
+    testImplementation("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")
     testImplementation("junit:junit:4.12")
     testImplementation("com.github.tomakehurst:wiremock:2.19.0")
 }

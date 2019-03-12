@@ -16,6 +16,7 @@ import org.apache.kafka.streams.kstream.Produced
 private val strings = Serdes.String()
 private val avroBehovSerde = SpecificAvroSerde<Behov>()
 private val genericAvro = GenericAvroSerde()
+private val packetSerde = Serdes.serdeFrom(PacketSerializer(), PacketDeserializer())
 
 object Topics {
     val JOARK_EVENTS = Topic(
@@ -30,10 +31,21 @@ object Topics {
         valueSerde = avroBehovSerde
     )
 
+    @Deprecated(
+        "Use DAGPENGER_BEHOV_PACKET_EVENT", replaceWith = ReplaceWith(
+            "DAGPENGER_BEHOV_PACKET_EVENT", "no.nav.dagpenger.streams"
+        )
+    )
     val DAGPENGER_BEHOV_EVENT = Topic(
         "privat-dagpenger-behov-alpha",
         keySerde = strings,
         valueSerde = strings
+    )
+
+    val DAGPENGER_BEHOV_PACKET_EVENT = Topic(
+        "privat-dagpenger-behov-alpha",
+        keySerde = strings,
+        valueSerde = packetSerde
     )
 }
 
