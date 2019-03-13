@@ -1,9 +1,6 @@
 package no.nav.dagpenger.streams
 
-import com.google.gson.JsonSyntaxException
-import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.JsonEncodingException
-import com.squareup.moshi.Moshi
 import org.json.JSONObject
 
 import org.junit.Test
@@ -30,7 +27,7 @@ class PacketTest {
     fun ` packet throws exception on invalid JSON`() {
         val invalidJson = """
             {
-                "key1": "value1"
+                "key1" "value1"
                 "key2": "value1",
             }
         """.trimIndent()
@@ -61,6 +58,7 @@ class PacketTest {
         """.trimIndent()
 
         assertTrue(JSONObject(Packet(jsonString).toJson()).has("system_read_count"))
+        assertTrue(JSONObject(Packet(jsonString).toJson()).has("system_started"))
         assertEquals(0, JSONObject(Packet(jsonString).toJson()).getInt("system_read_count"))
     }
 
@@ -116,7 +114,8 @@ class PacketTest {
         val jsonString = """
             {
                 "system_read_count": 5,
-                "key1": "value1"
+                "key1": "value1",
+                "key2": 5
             }
         """.trimIndent()
         val packet = Packet(jsonString)
@@ -125,6 +124,7 @@ class PacketTest {
         packet.putValue("long", 1L)
         packet.putValue("rubbish", "rubbish")
 
+        assertEquals(5, packet.getIntValue("key2"))
         assertEquals(1, packet.getIntValue("int"))
         assertEquals(1L, packet.getLongValue("long"))
         assertEquals(null, packet.getLongValue("noExisting"))
@@ -169,6 +169,35 @@ class PacketTest {
         assertFalse(packet.hasField("key2"))
     }
 
+    @Test
+    fun `can put complex object`() {
+        val jsonString = """
+            {
+                "system_read_count": 0,
+                "key1": "value1",
+                "anotherKey": "qwe"
+            }
+        """.trimIndent()
+        val packet = Packet(jsonString)
+        val complex = ClassA(
+            "inntektsId", listOf(
+                ClassB(
+                    YearMonth.of(2019, 2),
+                    listOf(ClassC(BigDecimal.ZERO, AnEnum.TILTAKSLØNN), ClassC(BigDecimal.TEN, AnEnum.ARBEIDSINNTEKT))
+                )
+            )
+        )
+        val adapter = moshiInstance.adapter<ClassA>(ClassA::class.java)
+
+        packet.putValue("complex", complex, adapter::toJson)
+
+        assertEquals(complex, packet.getObjectValue("complex", adapter::fromJson))
+
+        val snapshot = Packet(packet.toJson()!!)
+        assertEquals(complex, snapshot.getObjectValue("complex", adapter::fromJson))
+        assertEquals("qwe", snapshot.getStringValue("anotherKey"))
+    }
+
     data class ClassA(
         val inntektsId: String,
         val inntektsListe: List<ClassB>
@@ -192,33 +221,5 @@ class PacketTest {
         NÆRINGSINNTEKT,
         SYKEPENGER,
         TILTAKSLØNN
-    }
-
-    @Test
-    fun `can put complex object`() {
-        val jsonString = """
-            {
-                "system_read_count": 0,
-                "key1": "value1",
-                "anotherKey": "qwe"
-            }
-        """.trimIndent()
-        val packet = Packet(jsonString)
-        val complex = ClassA(
-            "innntektsId", listOf(
-                ClassB(
-                    YearMonth.of(2019, 2),
-                    listOf(ClassC(BigDecimal.ZERO, AnEnum.TILTAKSLØNN), ClassC(BigDecimal.TEN, AnEnum.ARBEIDSINNTEKT))
-                )
-            )
-        )
-        val adapter = moshiInstance.adapter<ClassA>(ClassA::class.java)
-
-        packet.putValue("complex", complex, adapter::toJson)
-
-        assertEquals(complex, packet.getObjectValue("complex", adapter::fromJson))
-
-        val snapshot = Packet(packet.toJson()!!)
-        assertEquals(complex, snapshot.getObjectValue("complex", adapter::fromJson) )
     }
 }

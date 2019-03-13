@@ -1,23 +1,26 @@
 package no.nav.dagpenger.streams
 
 import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.Moshi
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 class Packet internal constructor(jsonString: String) {
 
     companion object {
         internal const val READ_COUNT = "system_read_count"
+        internal const val STARTED = "system_started"
     }
 
-    private val moshi = Moshi.Builder().build()
-    private val adapter = moshi.adapter<MutableMap<String, Any?>>(MutableMap::class.java).lenient()
+    private val adapter = moshiInstance.adapter<MutableMap<String, Any?>>(MutableMap::class.java).lenient()
     private val json: MutableMap<String, Any?> =
         adapter.fromJson(jsonString) ?: throw JsonDataException("Could not parse JSON: $jsonString")
 
     init {
         if (!json.containsKey(READ_COUNT)) {
             json[READ_COUNT] = -1.0
+        }
+        if (!json.containsKey(STARTED)) {
+            json[STARTED] = LocalDateTime.now()
         }
         json[READ_COUNT] = (json[READ_COUNT] as Double).toInt() + 1
     }
@@ -58,7 +61,7 @@ class Packet internal constructor(jsonString: String) {
     }
 
     fun getIntValue(key: String): Int? {
-        return getValue(key)?.toString()?.toInt()
+        return getValue(key)?.toString()?.toDouble()?.toInt()
     }
 
     fun getLongValue(key: String): Long? {
