@@ -28,10 +28,10 @@ tasks.withType<KotlinCompile> {
 }
 
 group = "no.nav.dagpenger"
-version = "0.2.6-SNAPSHOT"
+version = "0.3.0-SNAPSHOT"
 
-val kafkaVersion = "2.0.0"
-val confluentVersion = "5.0.0"
+val kafkaVersion = "2.0.1"
+val confluentVersion = "5.0.2"
 val kotlinLoggingVersion = "1.6.22"
 val ktorVersion = "1.0.0"
 val prometheusVersion = "0.6.0"

@@ -12,9 +12,9 @@ class Packet internal constructor(jsonString: String) {
         else json.put("system_read_count", 1)
     }
 
-    fun getField(key: String): Any? = json.get(key)
+    fun getValue(key: String): Any? = json.get(key)
 
-    fun writeField(key: String, value: Any) {
+    fun put(key: String, value: Any) {
         if (json.has(key)) throw IllegalArgumentException("Cannot overwrite existing key: $key")
         json.put(key, value)
     }

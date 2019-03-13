@@ -19,7 +19,7 @@ class PacketTest {
             }
         """.trimIndent()
 
-        assertEquals("value1", Packet(jsonString).getField("key1"))
+        assertEquals("value1", Packet(jsonString).getValue("key1"))
     }
 
     @Test
@@ -82,7 +82,7 @@ class PacketTest {
             }
         """.trimIndent()
 
-        assertThrows<IllegalArgumentException> { Packet(jsonString).writeField("key1", "awe") }
+        assertThrows<IllegalArgumentException> { Packet(jsonString).put("key1", "awe") }
     }
 
     @Test
@@ -94,8 +94,8 @@ class PacketTest {
                 "key1": "value1",
             }
         """.trimIndent()
-        val packet = Packet(jsonString).also { it.writeField("list", listOf("awe", "qweqwe")) }
-        assertEquals(listOf("awe", "qweqwe"), packet.getField("list"))
+        val packet = Packet(jsonString).also { it.put("list", listOf("awe", "qweqwe")) }
+        assertEquals(listOf("awe", "qweqwe"), packet.getValue("list"))
     }
 
     @Test
@@ -107,8 +107,8 @@ class PacketTest {
                 "key1": "value1",
             }
         """.trimIndent()
-        val packet = Packet(jsonString).also { it.writeField("list", BigDecimal(5)) }
-        assertEquals(BigDecimal(5), packet.getField("list"))
+        val packet = Packet(jsonString).also { it.put("list", BigDecimal(5)) }
+        assertEquals(BigDecimal(5), packet.getValue("list"))
     }
 
     @Test

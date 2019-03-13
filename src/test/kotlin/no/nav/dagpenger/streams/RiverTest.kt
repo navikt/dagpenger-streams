@@ -1,19 +1,15 @@
 package no.nav.dagpenger.streams
 
-import org.apache.kafka.streams.KafkaStreams
-import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
-import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.TopologyTestDriver
-import org.apache.kafka.streams.kstream.Consumed
-import org.apache.kafka.streams.kstream.Produced
+import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams.test.ConsumerRecordFactory
 import org.junit.Test
 import java.util.Properties
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class PacketServiceTest {
+class RiverTest {
 
     companion object {
 
@@ -29,34 +25,13 @@ class PacketServiceTest {
         }
     }
 
-    class TestService : Service() {
+    class TestService : River() {
         override val SERVICE_APP_ID = "TestService"
 
-        override fun setupStreams(): KafkaStreams {
-            return KafkaStreams(buildTopology(), config)
-        }
-
-        fun buildTopology(): Topology {
-            val builder = StreamsBuilder()
-            val stream = builder.stream(
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
-                Consumed.with(
-                    Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde,
-                    Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde
-                )
-            )
-            stream
+        override fun river(stream: KStream<String, Packet>): KStream<String, Packet> {
+            return stream
                 .filter { _, packet -> !packet.hasField("new") }
-                .mapValues { packet -> packet.also { it.writeField("new", "newvalue") } }
-                .to(
-                    Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
-                    Produced.with(
-                        Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde,
-                        Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde
-                    )
-                )
-
-            return builder.build()
+                .mapValues { packet -> packet.also { it.put("new", "newvalue") } }
         }
     }
 
@@ -74,7 +49,10 @@ class PacketServiceTest {
             )
 
             assertTrue { ut != null }
-            assertEquals("newvalue", ut.value().getField("new"))
+            assertEquals("newvalue", ut.value().getValue("new"))
+            assertEquals(1, ut.value().getValue("key1"))
+            assertEquals("value1", ut.value().getValue("key2"))
+            assertEquals(true, ut.value().getValue("key3"))
         }
     }
 

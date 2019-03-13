@@ -4,6 +4,7 @@ import com.github.kittinunf.fuel.core.isSuccessful
 import com.github.kittinunf.fuel.httpGet
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
+import org.apache.kafka.streams.Topology
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
@@ -15,13 +16,10 @@ import kotlin.test.assertTrue
 class ServiceTest {
 
     class ServiceUnderTest(httpPort: Int) : Service() {
+        override fun buildTopology(): Topology = StreamsBuilder().build()
+
         override val SERVICE_APP_ID: String = "under-test"
         override val HTTP_PORT: Int = httpPort
-
-        override fun setupStreams(): KafkaStreams {
-            val builder = StreamsBuilder()
-            return KafkaStreams(builder.build(), this.getConfig())
-        }
 
         override fun getConfig(): Properties {
             return streamConfig(SERVICE_APP_ID, "localhost:${getAvailablePort()}", KafkaCredential("bla", "bla"))

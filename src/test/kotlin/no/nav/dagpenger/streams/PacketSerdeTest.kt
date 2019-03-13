@@ -13,7 +13,7 @@ class PacketSerdeTest {
     fun `deserializes to a packet`() {
         assertEquals(
             "value1",
-            PacketDeserializer().deserialize("topic", jsonString.toByteArray())?.getField("key1")
+            PacketDeserializer().deserialize("topic", jsonString.toByteArray())?.getValue("key1")
         )
     }
 
