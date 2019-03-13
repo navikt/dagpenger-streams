@@ -1,6 +1,7 @@
 package no.nav.dagpenger.streams
 
-import com.google.gson.GsonBuilder
+import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.Moshi
 import java.math.BigDecimal
 
 class Packet internal constructor(jsonString: String) {
@@ -9,10 +10,10 @@ class Packet internal constructor(jsonString: String) {
         internal const val READ_COUNT = "system_read_count"
     }
 
-    private val gsonBuilder = GsonBuilder().serializeNulls().setLenient()
-    private val jsonEngine = gsonBuilder.create()
-
-    val json = jsonEngine.fromJson<MutableMap<String, Any?>>(jsonString, HashMap::class.java)
+    private val moshi = Moshi.Builder().build()
+    private val adapter = moshi.adapter<MutableMap<String, Any?>>(MutableMap::class.java).lenient()
+    private val json: MutableMap<String, Any?> =
+        adapter.fromJson(jsonString) ?: throw JsonDataException("Could not parse JSON: $jsonString")
 
     init {
         if (!json.containsKey(READ_COUNT)) {
@@ -35,12 +36,20 @@ class Packet internal constructor(jsonString: String) {
         put(key, value)
     }
 
+    fun putValue(key: String, boolean: Boolean) {
+        put(key, boolean)
+    }
+
+    fun <T> putValue(key: String, thing: T, serialize: (T) -> String) {
+        put(key, serialize(thing))
+    }
+
     private fun put(key: String, value: Any) {
         if (json.containsKey(key)) throw IllegalArgumentException("Cannot overwrite existing key: $key")
         json[key] = value
     }
 
-    fun toJson(): String? = jsonEngine.toJson(json)
+    fun toJson(): String? = adapter.toJson(json)
 
     fun hasField(key: String): Boolean = json.containsKey(key)
 
@@ -60,8 +69,8 @@ class Packet internal constructor(jsonString: String) {
         return getValue(key)?.toString()
     }
 
-    fun putValue(key: String, boolean: Boolean) {
-        put(key, boolean)
+    fun <T> getObjectValue(key: String, deserialize: (String) -> T): T? {
+        return getStringValue(key)?.let { deserialize(it) }
     }
 
     fun getBoolean(key: String): Boolean? {

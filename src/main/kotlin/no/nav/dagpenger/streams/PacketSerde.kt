@@ -4,7 +4,7 @@ import kotlinx.io.core.String
 import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.Serializer
-import org.json.JSONException
+import java.lang.Exception
 import java.nio.charset.StandardCharsets
 
 class PacketSerializer : Serializer<Packet> {
@@ -24,8 +24,8 @@ class PacketDeserializer : Deserializer<Packet> {
         return data?.let {
             try {
                 Packet(String(data, charset = StandardCharsets.UTF_8))
-            } catch (jsonException: JSONException) {
-                throw SerializationException("Error when deserializing JSON to Packet")
+            } catch (e: Exception) {
+                throw SerializationException("Error when deserializing JSON to Packet", e)
             }
         }
     }

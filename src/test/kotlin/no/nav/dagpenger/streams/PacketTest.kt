@@ -1,8 +1,11 @@
 package no.nav.dagpenger.streams
 
 import com.google.gson.JsonSyntaxException
-
+import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.JsonEncodingException
+import com.squareup.moshi.Moshi
 import org.json.JSONObject
+
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -31,7 +34,7 @@ class PacketTest {
                 "key2": "value1",
             }
         """.trimIndent()
-        assertThrows<JsonSyntaxException> { Packet(invalidJson) }
+        assertThrows<JsonEncodingException> { Packet(invalidJson) }
     }
 
     @Test
@@ -195,7 +198,7 @@ class PacketTest {
     fun `can put complex object`() {
         val jsonString = """
             {
-                "system_read_count": 5,
+                "system_read_count": 0,
                 "key1": "value1",
                 "anotherKey": "qwe"
             }
@@ -209,9 +212,13 @@ class PacketTest {
                 )
             )
         )
-        packet.putValue("complex", complex.toString())
+        val adapter = moshiInstance.adapter<ClassA>(ClassA::class.java)
 
-//        assertEquals(complex, packet.getValue("complex"))
-        //      assertEquals(packet.toJson(), Packet(packet.toJson()!!).toJson())
+        packet.putValue("complex", complex, adapter::toJson)
+
+        assertEquals(complex, packet.getObjectValue("complex", adapter::fromJson))
+
+        val snapshot = Packet(packet.toJson()!!)
+        assertEquals(complex, snapshot.getObjectValue("complex", adapter::fromJson) )
     }
 }
