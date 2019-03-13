@@ -31,7 +31,7 @@ class RiverTest {
         override fun river(stream: KStream<String, Packet>): KStream<String, Packet> {
             return stream
                 .filter { _, packet -> !packet.hasField("new") }
-                .mapValues { packet -> packet.also { it.put("new", "newvalue") } }
+                .mapValues { packet -> packet.also { it.putValue("new", "newvalue") } }
         }
     }
 
@@ -49,31 +49,10 @@ class RiverTest {
             )
 
             assertTrue { ut != null }
-            assertEquals("newvalue", ut.value().getValue("new"))
-            assertEquals(1, ut.value().getValue("key1"))
-            assertEquals("value1", ut.value().getValue("key2"))
-            assertEquals(true, ut.value().getValue("key3"))
-        }
-    }
-
-    @Test
-    fun `Should be able to put complex structure`() {
-        val testService = TestService()
-
-        TopologyTestDriver(testService.buildTopology(), config).use { topologyTestDriver ->
-            val inputRecord = factory.create(Packet(jsonString))
-            topologyTestDriver.pipeInput(inputRecord)
-            val ut = topologyTestDriver.readOutput(
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.deserializer(),
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer()
-            )
-
-            assertTrue { ut != null }
-            assertEquals("newvalue", ut.value().getValue("new"))
-            assertEquals(1, ut.value().getValue("key1"))
-            assertEquals("value1", ut.value().getValue("key2"))
-            assertEquals(true, ut.value().getValue("key3"))
+            assertEquals("newvalue", ut.value().getStringValue("new"))
+            assertEquals(1, ut.value().getIntValue("key1"))
+            assertEquals("value1", ut.value().getStringValue("key2"))
+            assertEquals(true, ut.value().getBoolean("key3"))
         }
     }
 
@@ -81,7 +60,7 @@ class RiverTest {
             {
                 "key1": 1,
                 "key2": "value1",
-                "key3": true,
+                "key3": true
             }
         """.trimIndent()
 }
