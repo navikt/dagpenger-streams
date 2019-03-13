@@ -64,4 +64,3 @@ class RiverTest {
             }
         """.trimIndent()
 }
-

@@ -30,5 +30,5 @@ abstract class River : Service() {
         return builder.build()
     }
 
-    abstract fun river(stream: KStream<String, Packet>) : KStream<String, Packet>
+    abstract fun river(stream: KStream<String, Packet>): KStream<String, Packet>
 }
