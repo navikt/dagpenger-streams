@@ -27,8 +27,6 @@ class PacketDeserializer : Deserializer<Packet> {
             } catch (jsonException: JSONException) {
                 throw SerializationException("Error when deserializing JSON to Packet")
             }
-
         }
     }
 }
-

@@ -39,6 +39,7 @@ abstract class Service {
     }
 
     private fun setupStreamsInternal(): KafkaStreams {
+        LOGGER.info("Setting up topology for $SERVICE_APP_ID")
         val streams = KafkaStreams(buildTopology(), getConfig())
         streams.setUncaughtExceptionHandler { t, e ->
             logUnexpectedError(t, e)

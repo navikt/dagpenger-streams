@@ -56,6 +56,27 @@ class RiverTest {
         }
     }
 
+    @Test
+    fun `Should be able to put complex structure`() {
+        val testService = TestService()
+
+        TopologyTestDriver(testService.buildTopology(), config).use { topologyTestDriver ->
+            val inputRecord = factory.create(Packet(jsonString))
+            topologyTestDriver.pipeInput(inputRecord)
+            val ut = topologyTestDriver.readOutput(
+                Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
+                Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.deserializer(),
+                Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer()
+            )
+
+            assertTrue { ut != null }
+            assertEquals("newvalue", ut.value().getValue("new"))
+            assertEquals(1, ut.value().getValue("key1"))
+            assertEquals("value1", ut.value().getValue("key2"))
+            assertEquals(true, ut.value().getValue("key3"))
+        }
+    }
+
     val jsonString = """
             {
                 "key1": 1,
@@ -64,4 +85,3 @@ class RiverTest {
             }
         """.trimIndent()
 }
-
