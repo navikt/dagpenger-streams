@@ -170,6 +170,25 @@ class PacketTest {
     }
 
     @Test
+    fun `hasFields `() {
+
+        val jsonString = """
+            {
+                "system_read_count": 5,
+                "key1": "value1",
+                "anotherKey": "qwe",
+                "thirdKey": "qwe"
+            }
+        """.trimIndent()
+        val packet = Packet(jsonString)
+        assertTrue(packet.hasFields("key1"))
+        assertTrue(packet.hasFields("anotherKey"))
+        assertFalse(packet.hasFields("some other key"))
+        assertTrue(packet.hasFields("thirdKey", "key1", "anotherKey"))
+        assertFalse(packet.hasFields("thirdKey", "key1", "non existing", "anotherKey"))
+    }
+
+    @Test
     fun `can put complex object`() {
         val jsonString = """
             {

@@ -56,6 +56,8 @@ class Packet internal constructor(jsonString: String) {
 
     fun hasField(key: String): Boolean = json.containsKey(key)
 
+    fun hasFields(vararg keys: String): Boolean = keys.all { hasField(it) }
+
     fun getBigDecimalValue(key: String): BigDecimal? {
         return getValue(key)?.let { BigDecimal(it.toString()) }
     }
