@@ -49,9 +49,9 @@ class RiverTest {
             )
 
             assertTrue { ut != null }
-            assertEquals("newvalue", ut.value().getStringValue("new"))
-            assertEquals(1, ut.value().getIntValue("key1"))
-            assertEquals("value1", ut.value().getStringValue("key2"))
+            assertEquals("newvalue", ut.value().getNullableStringValue("new"))
+            assertEquals(1, ut.value().getNullableIntValue("key1"))
+            assertEquals("value1", ut.value().getNullableStringValue("key2"))
             assertEquals(true, ut.value().getBoolean("key3"))
         }
     }

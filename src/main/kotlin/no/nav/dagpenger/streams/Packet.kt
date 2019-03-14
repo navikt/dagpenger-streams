@@ -63,31 +63,20 @@ class Packet constructor(jsonString: String) {
 
     fun hasFields(vararg keys: String): Boolean = keys.all { hasField(it) }
 
-    fun getBigDecimalValue(key: String): BigDecimal? {
-        return getValue(key)?.let { BigDecimal(it.toString()) }
-    }
+    fun getNullableBigDecimalValue(key: String): BigDecimal? = getValue(key)?.let { BigDecimal(it.toString()) }
 
-    fun getIntValue(key: String): Int? {
-        return getValue(key)?.toString()?.toDouble()?.toInt()
-    }
+    fun getNullableIntValue(key: String): Int? = getValue(key)?.toString()?.toDouble()?.toInt()
 
-    fun getLongValue(key: String): Long? {
-        return getValue(key)?.toString()?.toLong()
-    }
+    fun getNullableLongValue(key: String): Long? = getValue(key)?.toString()?.toLong()
 
-    fun getStringValue(key: String): String? {
-        return getValue(key)?.toString()
-    }
+    fun getNullableStringValue(key: String) = getValue(key)?.toString()
 
-    fun getLocalDate(key: String): LocalDate? {
-        return getValue(key)?.let { LocalDate.parse(it.toString()) }
-    }
+    fun getNullableLocalDate(key: String): LocalDate? = getValue(key)?.let { LocalDate.parse(it.toString()) }
 
-    fun <T> getObjectValue(key: String, deserialize: (String) -> T): T? {
-        return getStringValue(key)?.let { deserialize(it) }
-    }
+    fun <T> getNullableObjectValue(key: String, deserialize: (String) -> T): T? =
+        getNullableStringValue(key)?.let { deserialize(it) }
 
-    fun getBoolean(key: String): Boolean? {
+    fun getNullableBoolean(key: String): Boolean? {
         val v: Any? = getValue(key)
         return when (v.toString().toLowerCase()) {
             "null" -> null
@@ -97,7 +86,19 @@ class Packet constructor(jsonString: String) {
         }
     }
 
-    override fun toString(): String {
-        return "Packet(json=${toJson()})"
-    }
+    fun getBigDecimalValue(key: String) = getNullableBigDecimalValue(key) ?: throw IllegalArgumentException("Null value for key=$key")
+
+    fun getIntValue(key: String) = getNullableIntValue(key) ?: throw IllegalArgumentException("Null value for key=$key")
+
+    fun getLongValue(key: String) = getNullableLongValue(key) ?: throw IllegalArgumentException("Null value for key=$key")
+
+    fun getStringValue(key: String) = getNullableStringValue(key) ?: throw IllegalArgumentException("Null value for key=$key")
+
+    fun getLocalDate(key: String) = getNullableLocalDate(key) ?: throw IllegalArgumentException("Null value for key=$key")
+
+    fun <T> getObjectValue(key: String, deserialize: (String) -> T) = getNullableObjectValue(key, deserialize) ?: throw IllegalArgumentException("Null value for key=$key")
+
+    fun getBoolean(key: String) = getNullableBoolean(key) ?: throw IllegalArgumentException("Null value for key=$key")
+
+    override fun toString(): String = "Packet(json=${toJson()})"
 }

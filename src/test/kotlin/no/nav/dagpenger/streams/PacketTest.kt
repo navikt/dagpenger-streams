@@ -22,7 +22,7 @@ class PacketTest {
             }
         """.trimIndent()
 
-        assertEquals("value1", Packet(jsonString).getStringValue("key1"))
+        assertEquals("value1", Packet(jsonString).getNullableStringValue("key1"))
     }
 
     @Test
@@ -90,7 +90,7 @@ class PacketTest {
     }
 
     @Test
-    fun `can write BigDecimal to packet`() {
+    fun `can write and get BigDecimal to packet`() {
 
         val jsonString = """
             {
@@ -104,9 +104,13 @@ class PacketTest {
         packet.putValue("dec2", BigDecimal(5.3))
         packet.putValue("rubbish", "rubbish")
 
+        assertEquals(BigDecimal(5), packet.getNullableBigDecimalValue("dec"))
         assertEquals(BigDecimal(5), packet.getBigDecimalValue("dec"))
+        assertEquals(BigDecimal(5.3), packet.getNullableBigDecimalValue("dec2"))
         assertEquals(BigDecimal(5.3), packet.getBigDecimalValue("dec2"))
-        assertEquals(null, packet.getBigDecimalValue("notExisting"))
+        assertEquals(null, packet.getNullableBigDecimalValue("notExisting"))
+        assertThrows<IllegalArgumentException> { packet.getBigDecimalValue("notExisting") }
+        assertThrows<NumberFormatException> { packet.getNullableLongValue("rubbish") }
         assertThrows<NumberFormatException> { packet.getLongValue("rubbish") }
     }
 
@@ -126,10 +130,19 @@ class PacketTest {
         packet.putValue("long", 1L)
         packet.putValue("rubbish", "rubbish")
 
+        assertEquals(5, packet.getNullableIntValue("key2"))
         assertEquals(5, packet.getIntValue("key2"))
+        assertEquals(1, packet.getNullableIntValue("int"))
         assertEquals(1, packet.getIntValue("int"))
+        assertEquals(1L, packet.getNullableLongValue("long"))
         assertEquals(1L, packet.getLongValue("long"))
-        assertEquals(null, packet.getLongValue("noExisting"))
+        assertEquals(null, packet.getNullableIntValue("noExisting"))
+        assertThrows<IllegalArgumentException> { packet.getIntValue("noExisting") }
+        assertEquals(null, packet.getNullableLongValue("noExisting"))
+        assertThrows<IllegalArgumentException> { packet.getLongValue("noExisting") }
+        assertThrows<NumberFormatException> { packet.getNullableIntValue("rubbish") }
+        assertThrows<NumberFormatException> { packet.getIntValue("rubbish") }
+        assertThrows<NumberFormatException> { packet.getNullableLongValue("rubbish") }
         assertThrows<NumberFormatException> { packet.getLongValue("rubbish") }
     }
 
@@ -148,9 +161,13 @@ class PacketTest {
         packet.putValue("booleanValue2", false)
         packet.putValue("notAnBoolean", "rubbish")
 
+        assertEquals(true, packet.getNullableBoolean("booleanValue1"))
         assertEquals(true, packet.getBoolean("booleanValue1"))
+        assertEquals(false, packet.getNullableBoolean("booleanValue2"))
         assertEquals(false, packet.getBoolean("booleanValue2"))
-        assertEquals(null, packet.getBoolean("notExistiing"))
+        assertEquals(null, packet.getNullableBoolean("notExistiing"))
+        assertThrows<IllegalArgumentException> { packet.getBoolean("notExistiing") }
+        assertThrows<IllegalArgumentException> { packet.getNullableBoolean("notAnBoolean") }
         assertThrows<IllegalArgumentException> { packet.getBoolean("notAnBoolean") }
     }
 
@@ -168,9 +185,11 @@ class PacketTest {
         packet.putValue("localdate", LocalDate.of(2019, 1, 15))
         packet.putValue("notALocalDate", "rubbish")
 
+        assertEquals(LocalDate.of(2019, 1, 15), packet.getNullableLocalDate("localdate"))
         assertEquals(LocalDate.of(2019, 1, 15), packet.getLocalDate("localdate"))
-        assertEquals(null, packet.getLocalDate("notExistiing"))
-        assertThrows<DateTimeParseException> { packet.getLocalDate("notALocalDate") }
+        assertEquals(null, packet.getNullableLocalDate("notExistiing"))
+        assertThrows<IllegalArgumentException> { packet.getLocalDate("notExistiing") }
+        assertThrows<DateTimeParseException> { packet.getNullableLocalDate("notALocalDate") }
     }
 
     @Test
@@ -231,11 +250,13 @@ class PacketTest {
 
         packet.putValue("complex", complex, adapter::toJson)
 
-        assertEquals(complex, packet.getObjectValue("complex", adapter::fromJson))
+        assertEquals(complex, packet.getNullableObjectValue("complex", adapter::fromJson))
 
         val snapshot = Packet(packet.toJson()!!)
-        assertEquals(complex, snapshot.getObjectValue("complex", adapter::fromJson))
-        assertEquals("qwe", snapshot.getStringValue("anotherKey"))
+        assertEquals(complex, snapshot.getNullableObjectValue("complex", adapter::fromJson))
+        assertEquals("qwe", snapshot.getNullableStringValue("anotherKey"))
+        assertEquals(null, packet.getNullableObjectValue("notExisting", adapter::fromJson))
+        assertThrows<IllegalArgumentException> { packet.getObjectValue("notExisting", adapter::fromJson) }
     }
 
     data class ClassA(
