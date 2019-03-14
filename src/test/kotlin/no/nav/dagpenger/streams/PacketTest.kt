@@ -173,7 +173,6 @@ class PacketTest {
         assertThrows<DateTimeParseException> { packet.getLocalDate("notALocalDate") }
     }
 
-
     @Test
     fun `hasField `() {
 
