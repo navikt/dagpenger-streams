@@ -5,7 +5,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class Packet internal constructor(jsonString: String) {
+class Packet constructor(jsonString: String) {
 
     companion object {
         internal const val READ_COUNT = "system_read_count"
@@ -95,5 +95,9 @@ class Packet internal constructor(jsonString: String) {
             "false" -> false
             else -> throw IllegalArgumentException("Value $v cannot be parsed to an Boolean")
         }
+    }
+
+    override fun toString(): String {
+        return "Packet(json=${toJson()})"
     }
 }
