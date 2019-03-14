@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeParseException
 import kotlin.test.assertTrue
 
 class PacketTest {
@@ -151,6 +153,26 @@ class PacketTest {
         assertEquals(null, packet.getBoolean("notExistiing"))
         assertThrows<IllegalArgumentException> { packet.getBoolean("notAnBoolean") }
     }
+
+    @Test
+    fun `can write and get LocalDate to packet`() {
+
+        val jsonString = """
+            {
+                "system_read_count": 5,
+                "key1": "value1"
+            }
+        """.trimIndent()
+        val packet = Packet(jsonString)
+
+        packet.putValue("localdate", LocalDate.of(2019, 1, 15))
+        packet.putValue("notALocalDate", "rubbish")
+
+        assertEquals(LocalDate.of(2019, 1, 15), packet.getLocalDate("localdate"))
+        assertEquals(null, packet.getLocalDate("notExistiing"))
+        assertThrows<DateTimeParseException> { packet.getLocalDate("notALocalDate") }
+    }
+
 
     @Test
     fun `hasField `() {

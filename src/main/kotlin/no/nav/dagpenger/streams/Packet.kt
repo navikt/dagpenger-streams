@@ -2,6 +2,7 @@ package no.nav.dagpenger.streams
 
 import com.squareup.moshi.JsonDataException
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 class Packet internal constructor(jsonString: String) {
@@ -43,6 +44,10 @@ class Packet internal constructor(jsonString: String) {
         put(key, boolean)
     }
 
+    fun putValue(key: String, localDate: LocalDate) {
+        put(key, localDate)
+    }
+
     fun <T> putValue(key: String, thing: T, serialize: (T) -> String) {
         put(key, serialize(thing))
     }
@@ -72,6 +77,10 @@ class Packet internal constructor(jsonString: String) {
 
     fun getStringValue(key: String): String? {
         return getValue(key)?.toString()
+    }
+
+    fun getLocalDate(key: String): LocalDate? {
+        return getValue(key)?.let { LocalDate.parse(it.toString()) }
     }
 
     fun <T> getObjectValue(key: String, deserialize: (String) -> T): T? {
