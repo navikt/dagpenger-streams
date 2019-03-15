@@ -14,6 +14,7 @@ import io.prometheus.client.exporter.common.TextFormat
 import io.prometheus.client.hotspot.DefaultExports
 import mu.KotlinLogging
 import org.apache.kafka.streams.KafkaStreams
+import org.apache.kafka.streams.Topology
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 
@@ -38,7 +39,8 @@ abstract class Service {
     }
 
     private fun setupStreamsInternal(): KafkaStreams {
-        val streams = setupStreams()
+        LOGGER.info("Setting up topology for $SERVICE_APP_ID")
+        val streams = KafkaStreams(buildTopology(), getConfig())
         streams.setUncaughtExceptionHandler { t, e ->
             logUnexpectedError(t, e)
             stop()
@@ -91,5 +93,5 @@ abstract class Service {
         )
     }
 
-    protected abstract fun setupStreams(): KafkaStreams
+    abstract fun buildTopology(): Topology
 }

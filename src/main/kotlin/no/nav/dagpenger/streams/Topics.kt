@@ -16,6 +16,7 @@ import org.apache.kafka.streams.kstream.Produced
 private val strings = Serdes.String()
 private val avroBehovSerde = SpecificAvroSerde<Behov>()
 private val genericAvro = GenericAvroSerde()
+private val packetSerde = Serdes.serdeFrom(PacketSerializer(), PacketDeserializer())
 
 object Topics {
     val JOARK_EVENTS = Topic(
@@ -30,10 +31,21 @@ object Topics {
         valueSerde = avroBehovSerde
     )
 
+    @Deprecated(
+        "Use DAGPENGER_BEHOV_PACKET_EVENT", replaceWith = ReplaceWith(
+            "DAGPENGER_BEHOV_PACKET_EVENT", "no.nav.dagpenger.streams"
+        )
+    )
     val DAGPENGER_BEHOV_EVENT = Topic(
         "privat-dagpenger-behov-alpha",
         keySerde = strings,
         valueSerde = strings
+    )
+
+    val DAGPENGER_BEHOV_PACKET_EVENT = Topic(
+        "privat-dagpenger-behov-alpha",
+        keySerde = strings,
+        valueSerde = packetSerde
     )
 }
 
@@ -83,6 +95,18 @@ fun <K : Any, V : SpecificRecord> StreamsBuilder.consumeTopic(
     return stream<K, V>(
         topic.name, Consumed.with(topic.keySerde, topic.valueSerde)
     )
+}
+
+fun <K : Any, V> StreamsBuilder.consumeTopic(
+    topic: Topic<K, V>
+): KStream<K, V> {
+    return stream<K, V>(
+        topic.name, Consumed.with(topic.keySerde, topic.valueSerde)
+    )
+}
+
+fun <K, V> KStream<K, V>.toTopic(topic: Topic<K, V>) {
+    return to(topic.name, Produced.with(topic.keySerde, topic.valueSerde))
 }
 
 fun <K, V> KStream<K, V>.toTopic(topic: Topic<K, V>, schemaRegistryUrl: String?) {
