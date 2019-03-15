@@ -5,6 +5,7 @@ import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Consumed
 import org.apache.kafka.streams.kstream.KStream
+import org.apache.kafka.streams.kstream.Predicate
 import org.apache.kafka.streams.kstream.Produced
 
 private val LOGGER = KotlinLogging.logger {}
@@ -21,7 +22,16 @@ abstract class River : Service() {
             )
         )
         stream.peek { key, packet -> LOGGER.info("Processing $packet with key $key") }
-        river(stream)
+            .filter { _, packet -> packet.}
+            .filter { key, packet -> filterPredicates().all { it.test(key, packet) } }
+            .mapValues { _, packet ->
+                try {
+                    onPacket(packet)
+                } catch (packetException: PacketException) {
+                    LOGGER.error("Packet problem: failed to process", packetException)
+                    packetException.packet
+                }
+            }
             .peek { key, packet -> LOGGER.info("Producing $packet with key $key") }
             .to(
                 Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
@@ -34,5 +44,6 @@ abstract class River : Service() {
         return builder.build()
     }
 
-    abstract fun river(stream: KStream<String, Packet>): KStream<String, Packet>
+    abstract fun filterPredicates(): List<Predicate<String, Packet>>
+    abstract fun onPacket(packet: Packet): Packet
 }

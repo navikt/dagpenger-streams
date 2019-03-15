@@ -3,6 +3,7 @@ package no.nav.dagpenger.streams
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.TopologyTestDriver
 import org.apache.kafka.streams.kstream.KStream
+import org.apache.kafka.streams.kstream.Predicate
 import org.apache.kafka.streams.test.ConsumerRecordFactory
 import org.junit.Test
 import java.util.Properties
@@ -28,10 +29,13 @@ class RiverTest {
     class TestService : River() {
         override val SERVICE_APP_ID = "TestService"
 
-        override fun river(stream: KStream<String, Packet>): KStream<String, Packet> {
-            return stream
-                .filter { _, packet -> !packet.hasField("new") }
-                .mapValues { packet -> packet.also { it.putValue("new", "newvalue") } }
+        override fun filterPredicates(): List<Predicate<String, Packet>> {
+            return listOf(Predicate { key, packet -> !packet.hasField("new") })
+        }
+
+        override fun onPacket(packet: Packet): Packet {
+            packet.putValue("new", "newvalue")
+            return packet
         }
     }
 
