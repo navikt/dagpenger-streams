@@ -18,13 +18,10 @@ internal class PacketProblemsTest {
         assertFalse(problems.hasErrors())
     }
 
-
     @Test fun `errors detected`() {
         problems.error("Simple error")
         assertTrue(problems.hasErrors())
         assertThat(problems.toString(), containsString("Errors"))
         assertThat(problems.toString(), containsString("Simple error"))
     }
-
-
 }
