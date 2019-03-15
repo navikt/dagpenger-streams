@@ -1,5 +1,6 @@
 package no.nav.dagpenger.streams
 
+import com.squareup.moshi.JsonDataException
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -12,10 +13,10 @@ class Packet constructor(jsonString: String) {
     }
 
     private val adapter = moshiInstance.adapter<MutableMap<String, Any?>>(MutableMap::class.java).lenient()
-    private val json: MutableMap<String, Any?> = adapter.fromJson(jsonString) ?: throw PacketProblem(jsonString, "Failed to parse JSON: $jsonString")
-    private
-    init {
+    private val json: MutableMap<String, Any?> =
+        adapter.fromJson(jsonString) ?: throw JsonDataException("Could not parse JSON: $jsonString")
 
+    init {
         if (!json.containsKey(READ_COUNT)) {
             json[READ_COUNT] = -1.0
         }
@@ -85,22 +86,17 @@ class Packet constructor(jsonString: String) {
         }
     }
 
-    fun getBigDecimalValue(key: String) =
-        getNullableBigDecimalValue(key) ?: throw IllegalArgumentException("Null value for key=$key")
+    fun getBigDecimalValue(key: String) = getNullableBigDecimalValue(key) ?: throw IllegalArgumentException("Null value for key=$key")
 
     fun getIntValue(key: String) = getNullableIntValue(key) ?: throw IllegalArgumentException("Null value for key=$key")
 
-    fun getLongValue(key: String) =
-        getNullableLongValue(key) ?: throw IllegalArgumentException("Null value for key=$key")
+    fun getLongValue(key: String) = getNullableLongValue(key) ?: throw IllegalArgumentException("Null value for key=$key")
 
-    fun getStringValue(key: String) =
-        getNullableStringValue(key) ?: throw IllegalArgumentException("Null value for key=$key")
+    fun getStringValue(key: String) = getNullableStringValue(key) ?: throw IllegalArgumentException("Null value for key=$key")
 
-    fun getLocalDate(key: String) =
-        getNullableLocalDate(key) ?: throw IllegalArgumentException("Null value for key=$key")
+    fun getLocalDate(key: String) = getNullableLocalDate(key) ?: throw IllegalArgumentException("Null value for key=$key")
 
-    fun <T> getObjectValue(key: String, deserialize: (String) -> T): T =
-        getNullableObjectValue(key, deserialize) ?: throw IllegalArgumentException("Null value for key=$key")
+    fun <T> getObjectValue(key: String, deserialize: (String) -> T) : T = getNullableObjectValue(key, deserialize) ?: throw IllegalArgumentException("Null value for key=$key")
 
     fun getBoolean(key: String) = getNullableBoolean(key) ?: throw IllegalArgumentException("Null value for key=$key")
 

@@ -14,15 +14,14 @@ abstract class River : Service() {
         val builder = StreamsBuilder()
         val stream = builder.consumeTopic(DAGPENGER_BEHOV_PACKET_EVENT)
         stream.peek { key, packet -> LOGGER.info("Processing $packet with key $key") }
-            .filter { _, packet -> packet}
+            .filter { _, packet -> packet.}
             .filter { key, packet -> filterPredicates().all { it.test(key, packet) } }
             .mapValues { _, packet ->
                 try {
                     onPacket(packet)
-                } catch (packetException: PacketProblems) {
+                } catch (packetException: PacketException) {
                     LOGGER.error("Packet problem: failed to process", packetException)
-                    packet.addProblem(packetException)
-                    packet
+                    packetException.packet
                 }
             }
             .peek { key, packet -> LOGGER.info("Producing $packet with key $key") }
