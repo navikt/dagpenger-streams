@@ -97,6 +97,18 @@ fun <K : Any, V : SpecificRecord> StreamsBuilder.consumeTopic(
     )
 }
 
+fun <K : Any, V> StreamsBuilder.consumeTopic(
+    topic: Topic<K, V>
+): KStream<K, V> {
+    return stream<K, V>(
+        topic.name, Consumed.with(topic.keySerde, topic.valueSerde)
+    )
+}
+
+fun <K, V> KStream<K, V>.toTopic(topic: Topic<K, V>) {
+    return to(topic.name, Produced.with(topic.keySerde, topic.valueSerde))
+}
+
 fun <K, V> KStream<K, V>.toTopic(topic: Topic<K, V>, schemaRegistryUrl: String?) {
     schemaRegistryUrl?.let {
         topic.keySerde.configure(
