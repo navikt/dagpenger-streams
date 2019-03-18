@@ -1,5 +1,6 @@
 package no.nav.dagpenger.streams
 
+import no.nav.dagpenger.events.Packet
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.TopologyTestDriver
 import org.apache.kafka.streams.kstream.Predicate
@@ -29,7 +30,7 @@ class RiverTest {
         override val SERVICE_APP_ID = "TestService"
 
         override fun filterPredicates(): List<Predicate<String, Packet>> {
-            return listOf(Predicate { key, packet -> !packet.hasField("new") })
+            return listOf(Predicate { _, packet -> !packet.hasField("new") })
         }
 
         override fun onPacket(packet: Packet): Packet {

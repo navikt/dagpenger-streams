@@ -28,7 +28,7 @@ tasks.withType<KotlinCompile> {
 }
 
 group = "no.nav.dagpenger"
-version = "0.3.0-SNAPSHOT"
+version = "0.3.1-SNAPSHOT"
 
 val kafkaVersion = "2.0.1"
 val confluentVersion = "5.0.2"
@@ -42,7 +42,7 @@ val moshiVersion = "1.8.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("no.nav.dagpenger:events:0.2.1-SNAPSHOT")
+    implementation("no.nav.dagpenger:events:0.3.0-SNAPSHOT")
 
     api("org.apache.kafka:kafka-clients:$kafkaVersion")
     api("org.apache.kafka:kafka-streams:$kafkaVersion")

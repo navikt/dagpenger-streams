@@ -1,6 +1,7 @@
 package no.nav.dagpenger.streams
 
 import kotlinx.io.core.String
+import no.nav.dagpenger.events.Packet
 import org.apache.kafka.common.errors.SerializationException
 import org.json.JSONObject
 import org.junit.jupiter.api.Test

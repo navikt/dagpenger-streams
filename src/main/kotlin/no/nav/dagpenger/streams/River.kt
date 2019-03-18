@@ -1,6 +1,7 @@
 package no.nav.dagpenger.streams
 
 import mu.KotlinLogging
+import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.streams.Topics.DAGPENGER_BEHOV_PACKET_EVENT
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
