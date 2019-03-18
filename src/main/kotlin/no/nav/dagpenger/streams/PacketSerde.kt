@@ -1,6 +1,7 @@
 package no.nav.dagpenger.streams
 
 import kotlinx.io.core.String
+import no.nav.dagpenger.events.Packet
 import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.Serializer
