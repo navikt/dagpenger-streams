@@ -82,8 +82,6 @@ class RiverTest {
 
         override fun onPacket(packet: Packet): Packet {
             throw RuntimeException("Fail to process")
-            //   packet.putValue("new", "newvalue")
-            // return packet
         }
 
         override fun onFailure(packet: Packet): Packet {
