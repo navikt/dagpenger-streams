@@ -16,18 +16,13 @@ abstract class River : Service() {
         val builder = StreamsBuilder()
         val stream = builder.consumeTopic(DAGPENGER_BEHOV_PACKET_EVENT)
         stream
-            .filterNot { _, packet ->
-                if (packet.hasProblem()) {
-                    LOGGER.warn { "Skipping packet with problem. Packet $packet" }
-                }
-                packet.hasProblem()
-            }
+            .filterNot { _, packet -> packet.hasProblem() }
             .filter { key, packet -> filterPredicates().all { it.test(key, packet) } }
             .mapValues { _, packet ->
                 val result = runCatching { onPacket(packet) }
                 return@mapValues when {
                     result.isFailure -> {
-                        LOGGER.error(result.exceptionOrNull()) { "Failed to process packet" }
+                        LOGGER.error(result.exceptionOrNull()) { "Failed to process packet $packet" }
                         return@mapValues onFailure(packet)
                     }
                     else -> result.getOrThrow()
