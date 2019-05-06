@@ -6,6 +6,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.streams.StreamsConfig
+import org.apache.kafka.streams.StreamsConfig.EXACTLY_ONCE
 import org.apache.kafka.streams.errors.LogAndFailExceptionHandler
 import java.io.File
 import java.lang.System.getenv
@@ -27,7 +28,7 @@ fun streamConfig(
                         StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootStapServerUrl,
                         StreamsConfig.APPLICATION_ID_CONFIG to appId,
                         // TODO Using processing guarantee requires replication of 3, not possible with current single node dev environment
-                        //StreamsConfig.PROCESSING_GUARANTEE_CONFIG to "exactly_once",
+                        StreamsConfig.PROCESSING_GUARANTEE_CONFIG to EXACTLY_ONCE,
                         StreamsConfig.COMMIT_INTERVAL_MS_CONFIG to 1,
                         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
                         StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG to LogAndFailExceptionHandler::class.java
