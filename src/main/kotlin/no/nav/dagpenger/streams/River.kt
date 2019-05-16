@@ -23,7 +23,7 @@ abstract class River : Service() {
                 return@mapValues when {
                     result.isFailure -> {
                         LOGGER.error(result.exceptionOrNull()) { "Failed to process packet $packet" }
-                        return@mapValues onFailure(packet)
+                        return@mapValues onFailure(packet, result.exceptionOrNull())
                     }
                     else -> result.getOrThrow()
                 }
@@ -35,7 +35,8 @@ abstract class River : Service() {
 
     abstract fun filterPredicates(): List<Predicate<String, Packet>>
     abstract fun onPacket(packet: Packet): Packet
-    open fun onFailure(packet: Packet): Packet {
+
+    open fun onFailure(packet: Packet, error: Throwable?): Packet {
         packet.addProblem(
             Problem(
                 title = "Ukjent feil ved behandling av Packet"
