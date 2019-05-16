@@ -28,7 +28,7 @@ tasks.withType<KotlinCompile> {
 }
 
 group = "no.nav.dagpenger"
-version = "0.3.6-SNAPSHOT"
+version = "0.3.7-SNAPSHOT"
 
 val kafkaVersion = "2.0.1"
 val confluentVersion = "5.0.2"
@@ -44,9 +44,9 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation("no.nav.dagpenger:events:0.3.11-SNAPSHOT")
 
-    api("org.apache.kafka:kafka-clients:$kafkaVersion")
-    api("org.apache.kafka:kafka-streams:$kafkaVersion")
-    api("io.confluent:kafka-streams-avro-serde:$confluentVersion")
+    implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
+    implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
+    implementation("io.confluent:kafka-streams-avro-serde:$confluentVersion")
     implementation("com.squareup.moshi:moshi-adapters:$moshiVersion")
     implementation("com.squareup.moshi:moshi-kotlin:$moshiVersion")
     implementation("com.squareup.moshi:moshi:$moshiVersion")
@@ -56,8 +56,8 @@ dependencies {
     implementation("com.github.kittinunf.fuel:fuel:$fuelVersion")
     implementation("com.github.kittinunf.fuel:fuel-gson:$fuelVersion")
 
-    api("io.prometheus:simpleclient_common:$prometheusVersion")
-    api("io.prometheus:simpleclient_hotspot:$prometheusVersion")
+    implementation("io.prometheus:simpleclient_common:$prometheusVersion")
+    implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
