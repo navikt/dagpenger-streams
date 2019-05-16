@@ -84,10 +84,10 @@ class RiverTest {
             throw RuntimeException("Fail to process")
         }
 
-        override fun onFailure(packet: Packet): Packet {
+        override fun onFailure(packet: Packet, error: Throwable?): Packet {
             packet.addProblem(
                 Problem(
-                    title = "ERROR"
+                    title = error!!.message!!
 
                 )
             )
@@ -129,7 +129,7 @@ class RiverTest {
 
             assertTrue { ut != null }
             assertTrue { ut.value().hasProblem() }
-            assertEquals("ERROR", ut.value().getProblem()?.title)
+            assertEquals("Fail to process", ut.value().getProblem()?.title)
         }
     }
 
