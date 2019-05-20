@@ -44,7 +44,7 @@ val moshiVersion = "1.8.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("no.nav.dagpenger:events:0.3.11-SNAPSHOT")
+    implementation("no.nav.dagpenger:events:0.3.12-SNAPSHOT")
 
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
     implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
