@@ -15,17 +15,16 @@ class StreamConfigTest {
 
         val properties = streamConfig("test-app", "localhost:9093")
         properties shouldNotContainKey StreamsConfig.PROCESSING_GUARANTEE_CONFIG
-        properties shouldNotContainValue  StreamsConfig.EXACTLY_ONCE
+        properties shouldNotContainValue StreamsConfig.EXACTLY_ONCE
     }
-
 
     @Test
     fun `Should  have configured PROCESSING_GUARANTEE_CONFIG to EXACTLY_ONCE on dev profile `() {
 
         System.setProperty("NAIS_CLUSTER_NAME", "dev-fss")
         val properties = streamConfig("test-app", "localhost:9093")
-        properties shouldContainKey  StreamsConfig.PROCESSING_GUARANTEE_CONFIG
-        properties shouldContainValue  StreamsConfig.EXACTLY_ONCE
+        properties shouldContainKey StreamsConfig.PROCESSING_GUARANTEE_CONFIG
+        properties shouldContainValue StreamsConfig.EXACTLY_ONCE
         System.clearProperty("NAIS_CLUSTER_NAME")
     }
 
@@ -35,9 +34,7 @@ class StreamConfigTest {
         System.setProperty("NAIS_CLUSTER_NAME", "prod-fss")
         val properties = streamConfig("test-app", "localhost:9093")
         properties shouldContainKey StreamsConfig.PROCESSING_GUARANTEE_CONFIG
-        properties shouldContainValue  StreamsConfig.EXACTLY_ONCE
+        properties shouldContainValue StreamsConfig.EXACTLY_ONCE
         System.clearProperty("NAIS_CLUSTER_NAME")
     }
-
-
 }
