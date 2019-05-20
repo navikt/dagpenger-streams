@@ -28,8 +28,7 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-group = "no.nav.dagpenger"
-version = "0.3.7-SNAPSHOT"
+group = "com.github.navikt"
 
 val kafkaVersion = "2.0.1"
 val confluentVersion = "5.0.2"
