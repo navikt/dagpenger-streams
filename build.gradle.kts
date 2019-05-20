@@ -17,6 +17,7 @@ apply {
 repositories {
     mavenCentral()
     maven("http://packages.confluent.io/maven/")
+    maven("https://jitpack.io")
     maven("https://dl.bintray.com/kotlin/ktor")
     maven("https://dl.bintray.com/kotlin/kotlinx")
     maven("https://dl.bintray.com/kittinunf/maven")
@@ -33,7 +34,8 @@ version = "0.3.7-SNAPSHOT"
 val kafkaVersion = "2.0.1"
 val confluentVersion = "5.0.2"
 val kotlinLoggingVersion = "1.6.22"
-val ktorVersion = "1.0.0"
+val ktorVersion = "1.2.0"
+val konfigVersion = "1.6.10.0"
 val prometheusVersion = "0.6.0"
 val fuelVersion = "1.15.0"
 val orgJsonVersion = "20180813"
@@ -56,6 +58,8 @@ dependencies {
     implementation("com.github.kittinunf.fuel:fuel:$fuelVersion")
     implementation("com.github.kittinunf.fuel:fuel-gson:$fuelVersion")
 
+    implementation("com.natpryce:konfig:$konfigVersion")
+
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
@@ -67,11 +71,11 @@ dependencies {
     testImplementation("org.json:json:$orgJsonVersion")
     testImplementation("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")
     testImplementation("junit:junit:4.12")
-    testImplementation("com.github.tomakehurst:wiremock:2.19.0")
+    testImplementation("io.kotlintest:kotlintest-runner-junit5:3.3.0")
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
-    classifier = "sources"
+    archiveClassifier.set("sources")
     from(sourceSets["main"].allSource)
 }
 
@@ -109,37 +113,6 @@ publishing {
             }
         }
     }
-
-    repositories {
-        maven {
-            credentials {
-                username = System.getenv("OSSRH_JIRA_USERNAME")
-                password = System.getenv("OSSRH_JIRA_PASSWORD")
-            }
-            val version = project.version as String
-            url = if (version.endsWith("-SNAPSHOT")) {
-                uri("https://oss.sonatype.org/content/repositories/snapshots")
-            } else {
-                uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            }
-        }
-    }
-}
-
-ext["signing.gnupg.keyName"] = System.getenv("GPG_KEY_NAME")
-ext["signing.gnupg.passphrase"] = System.getenv("GPG_PASSPHRASE")
-ext["signing.gnupg.useLegacyGpg"] = true
-
-signing {
-    useGpgCmd()
-    sign(publishing.publications["mavenJava"])
-}
-
-nexusStaging {
-    username = System.getenv("OSSRH_JIRA_USERNAME")
-    password = System.getenv("OSSRH_JIRA_PASSWORD")
-    packageGroup = "no.nav"
-    stagingProfileId = "3a10cafa813c47"
 }
 
 spotless {
