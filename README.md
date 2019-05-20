@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.org/navikt/dagpenger-streams.svg?branch=master)](https://travis-ci.org/navikt/dagpenger-streams)
+[![CircleCI](https://circleci.com/gh/navikt/dagpenger-streams.svg?style=svg)](https://circleci.com/gh/navikt/dagpenger-streams)
+
+[![](https://jitpack.io/v/navikt/dagpenger-streams.svg)](https://jitpack.io/#navikt/dagpenger-streams)
 
 # Streams
 

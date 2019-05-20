@@ -43,7 +43,7 @@ val moshiVersion = "1.8.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("no.nav.dagpenger:events:0.3.12-SNAPSHOT")
+    api("com.github.navikt:dagpenger-events:2019.05.20-11.56.33cd4c73a439")
 
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
     implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
