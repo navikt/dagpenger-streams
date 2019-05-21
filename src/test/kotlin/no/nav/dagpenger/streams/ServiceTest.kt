@@ -1,16 +1,16 @@
 package no.nav.dagpenger.streams
 
-import com.github.kittinunf.fuel.core.isSuccessful
-import com.github.kittinunf.fuel.httpGet
+import io.kotlintest.shouldBe
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.net.ServerSocket
+import java.net.URL
 import java.util.Properties
-import kotlin.test.assertTrue
 
 class ServiceTest {
 
@@ -56,28 +56,28 @@ class ServiceTest {
 
     @Test
     fun `Should have http alive check`() {
-        val (_, response, result) = with("http://localhost:$httpPort/isAlive".httpGet()) {
-            responseString()
-        }
-
-        assertTrue("should have isAlive endpoint but was $result") { response.isSuccessful }
+        assert200okUrl("http://localhost:$httpPort/isAlive")
     }
 
     @Test
     fun `Should have http ready check`() {
-        val (_, response, result) = with("http://localhost:$httpPort/isReady".httpGet()) {
-            responseString()
-        }
-
-        assertTrue("should have isReady endpoint but was $result") { response.isSuccessful }
+        assert200okUrl("http://localhost:$httpPort/isReady")
     }
 
     @Test
     fun `Should have http metrics endpoint check`() {
-        val (_, response, result) = with("http://localhost:$httpPort/metrics".httpGet()) {
-            responseString()
-        }
+        assert200okUrl("http://localhost:$httpPort/metrics")
+    }
 
-        assertTrue("should have metrics endpoint but was $result") { response.isSuccessful }
+    private fun assert200okUrl(urlString: String) {
+        val url = URL(urlString)
+        val con = url.openConnection() as HttpURLConnection
+
+        // optional default is GET
+        con.requestMethod = "GET"
+
+        val responseCode = con.responseCode
+
+        responseCode shouldBe 200
     }
 }

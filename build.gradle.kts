@@ -36,7 +36,6 @@ val kotlinLoggingVersion = "1.6.22"
 val ktorVersion = "1.2.0"
 val konfigVersion = "1.6.10.0"
 val prometheusVersion = "0.6.0"
-val fuelVersion = "1.15.0"
 val orgJsonVersion = "20180813"
 val jupiterVersion = "5.3.2"
 val moshiVersion = "1.8.0"
@@ -54,8 +53,6 @@ dependencies {
 
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("com.github.kittinunf.fuel:fuel:$fuelVersion")
-    implementation("com.github.kittinunf.fuel:fuel-gson:$fuelVersion")
 
     implementation("com.natpryce:konfig:$konfigVersion")
 
