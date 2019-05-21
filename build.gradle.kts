@@ -116,10 +116,10 @@ publishing {
 
 spotless {
     kotlin {
-        ktlint()
+        ktlint("0.31.0")
     }
     kotlinGradle {
         target("*.gradle.kts", "additionalScripts/*.gradle.kts")
-        ktlint()
+        ktlint("0.31.0")
     }
 }
