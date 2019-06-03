@@ -31,19 +31,8 @@ object Topics {
         valueSerde = avroBehovSerde
     )
 
-    @Deprecated(
-        "Use DAGPENGER_BEHOV_PACKET_EVENT", replaceWith = ReplaceWith(
-            "DAGPENGER_BEHOV_PACKET_EVENT", "no.nav.dagpenger.streams"
-        )
-    )
-    val DAGPENGER_BEHOV_EVENT = Topic(
-        "privat-dagpenger-behov-alpha",
-        keySerde = strings,
-        valueSerde = strings
-    )
-
     val DAGPENGER_BEHOV_PACKET_EVENT = Topic(
-        "privat-dagpenger-behov-alpha",
+        "privat-dagpenger-behov-v1",
         keySerde = strings,
         valueSerde = packetSerde
     )
