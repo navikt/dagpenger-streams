@@ -19,7 +19,14 @@ abstract class River : Service() {
             .filterNot { _, packet -> packet.hasProblem() }
             .filter { key, packet -> filterPredicates().all { it.test(key, packet) } }
             .mapValues { _, packet ->
-                val result = runCatching { onPacket(packet) }
+                val result = runCatching {
+                    val timer = processTimeLatency.startTimer()
+                    try {
+                        onPacket(packet)
+                    } finally {
+                        timer.observeDuration()
+                    }
+                }
                 return@mapValues when {
                     result.isFailure -> {
                         LOGGER.error(result.exceptionOrNull()) { "Failed to process packet $packet" }
