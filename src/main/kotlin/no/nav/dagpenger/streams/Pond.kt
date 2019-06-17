@@ -16,7 +16,11 @@ abstract class Pond : Service() {
         val stream = builder.consumeTopic(DAGPENGER_BEHOV_PACKET_EVENT)
         stream.peek { key, packet -> LOGGER.info("Processing $packet with key $key") }
             .filter { key, packet -> filterPredicates().all { it.test(key, packet) } }
-            .foreach { _, packet -> onPacket(packet) }
+            .foreach { _, packet ->
+                val timer = processTimeLatency.startTimer()
+                onPacket(packet)
+                timer.observeDuration()
+            }
         return builder.build()
     }
 
