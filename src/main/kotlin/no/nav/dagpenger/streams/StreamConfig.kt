@@ -46,6 +46,7 @@ fun streamConfig(
 
         if (Profile.LOCAL != Configuration().profile) {
             put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, EXACTLY_ONCE)
+            put(StreamsConfig.REPLICATION_FACTOR_CONFIG, "3")
         }
         stateDir?.let { put(StreamsConfig.STATE_DIR_CONFIG, stateDir) }
 
