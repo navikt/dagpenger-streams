@@ -9,6 +9,7 @@ import com.natpryce.konfig.stringType
 import mu.KotlinLogging
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.streams.StreamsConfig
@@ -36,7 +37,10 @@ fun streamConfig(
 
                         StreamsConfig.COMMIT_INTERVAL_MS_CONFIG to 1,
                         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
-                        StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG to LogAndFailExceptionHandler::class.java
+                        StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG to LogAndFailExceptionHandler::class.java,
+
+                        ProducerConfig.LINGER_MS_CONFIG to 20,
+                        StreamsConfig.POLL_MS_CONFIG to 20
                 )
         )
 
