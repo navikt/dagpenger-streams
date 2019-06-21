@@ -34,7 +34,6 @@ val kafkaVersion = "2.0.1"
 val confluentVersion = "5.0.2"
 val kotlinLoggingVersion = "1.6.22"
 val ktorVersion = "1.2.0"
-val konfigVersion = "1.6.10.0"
 val prometheusVersion = "0.6.0"
 val orgJsonVersion = "20180813"
 val jupiterVersion = "5.3.2"
@@ -53,8 +52,6 @@ dependencies {
 
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-
-    implementation("com.natpryce:konfig:$konfigVersion")
 
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
