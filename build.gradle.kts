@@ -58,6 +58,8 @@ dependencies {
 
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.1.5")
+    implementation("io.micrometer:micrometer-core:1.1.5")
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))

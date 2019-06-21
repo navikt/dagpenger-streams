@@ -9,6 +9,10 @@ import io.ktor.routing.routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.micrometer.core.instrument.Clock
+import io.micrometer.core.instrument.binder.kafka.KafkaConsumerMetrics
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
 import io.prometheus.client.hotspot.DefaultExports
@@ -25,13 +29,15 @@ abstract class Service {
     protected abstract val SERVICE_APP_ID: String
     protected open val HTTP_PORT: Int = 8080
     private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
+    private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM)
+    private val kafkaConsumerMetrics = KafkaConsumerMetrics()
 
     private lateinit var streams: KafkaStreams
     private lateinit var applicationEngine: ApplicationEngine
     fun start() {
+        kafkaConsumerMetrics.bindTo(registry)
         DefaultExports.initialize()
-        applicationEngine = naisHttpChecks()
-        applicationEngine.start(wait = false)
+        applicationEngine = naisHttpChecks().start(wait = false)
         streams = setupStreamsInternal()
         streams.start()
         LOGGER.info("Started Service $SERVICE_APP_ID")
