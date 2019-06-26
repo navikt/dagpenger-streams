@@ -23,20 +23,20 @@ fun streamConfig(
 ): Properties {
     return Properties().apply {
         putAll(
-                listOf(
-                        CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 1000,
-                        CommonClientConfigs.RECONNECT_BACKOFF_MS_CONFIG to 5000,
-                        StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootStapServerUrl,
-                        StreamsConfig.APPLICATION_ID_CONFIG to appId,
+            listOf(
+                CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 1000,
+                CommonClientConfigs.RECONNECT_BACKOFF_MS_CONFIG to 5000,
+                StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootStapServerUrl,
+                StreamsConfig.APPLICATION_ID_CONFIG to appId,
 
-                        StreamsConfig.COMMIT_INTERVAL_MS_CONFIG to 1,
-                        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
-                        StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG to LogAndFailExceptionHandler::class.java,
+                StreamsConfig.COMMIT_INTERVAL_MS_CONFIG to 1,
+                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
+                StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG to LogAndFailExceptionHandler::class.java,
 
-                        StreamsConfig.POLL_MS_CONFIG to 20,
-                        StreamsConfig.producerPrefix(ProducerConfig.LINGER_MS_CONFIG) to 20,
-                        StreamsConfig.PROCESSING_GUARANTEE_CONFIG to AT_LEAST_ONCE
-                )
+                StreamsConfig.POLL_MS_CONFIG to 20,
+                StreamsConfig.producerPrefix(ProducerConfig.LINGER_MS_CONFIG) to 20,
+                StreamsConfig.PROCESSING_GUARANTEE_CONFIG to AT_LEAST_ONCE
+            )
         )
 
         stateDir?.let { put(StreamsConfig.STATE_DIR_CONFIG, stateDir) }
@@ -45,7 +45,10 @@ fun streamConfig(
             LOGGER.info { "Using user name ${credential.username} to authenticate against Kafka brokers " }
             put(SaslConfigs.SASL_MECHANISM, "PLAIN")
             put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
-            put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${credential.username}\" password=\"${credential.password}\";")
+            put(
+                SaslConfigs.SASL_JAAS_CONFIG,
+                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${credential.username}\" password=\"${credential.password}\";"
+            )
 
             val trustStoreLocation = getenv("NAV_TRUSTSTORE_PATH")
             trustStoreLocation?.let {
