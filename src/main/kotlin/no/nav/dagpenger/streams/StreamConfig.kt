@@ -33,8 +33,6 @@ fun streamConfig(
                 ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
                 StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG to LogAndFailExceptionHandler::class.java,
 
-                StreamsConfig.POLL_MS_CONFIG to 20,
-                StreamsConfig.producerPrefix(ProducerConfig.LINGER_MS_CONFIG) to 20,
                 StreamsConfig.PROCESSING_GUARANTEE_CONFIG to AT_LEAST_ONCE
             )
         )
