@@ -16,9 +16,12 @@ abstract class River : Service() {
         val builder = StreamsBuilder()
         val stream = builder.consumeTopic(DAGPENGER_BEHOV_PACKET_EVENT)
         stream
+            .peek { key, _ -> LOGGER.info("River recieved packet with key $key and will test it against filters.") }
             .filterNot { _, packet -> packet.hasProblem() }
             .filter { key, packet -> filterPredicates().all { it.test(key, packet) } }
-            .mapValues { _, packet ->
+            .mapValues { key, packet ->
+                LOGGER.info("Packet with key $key passed filters and now calling onPacket() for: $packet")
+
                 val result = runCatching {
                     val timer = processTimeLatency.startTimer()
                     try {
@@ -35,7 +38,7 @@ abstract class River : Service() {
                     else -> result.getOrThrow()
                 }
             }
-            .peek { key, packet -> LOGGER.info("Producing $packet with key $key") }
+            .peek { key, packet -> LOGGER.info("Producing packet with key $key and value: $packet") }
             .toTopic(DAGPENGER_BEHOV_PACKET_EVENT)
         return builder.build()
     }

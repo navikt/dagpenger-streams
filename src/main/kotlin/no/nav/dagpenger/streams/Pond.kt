@@ -14,9 +14,12 @@ abstract class Pond : Service() {
     override fun buildTopology(): Topology {
         val builder = StreamsBuilder()
         val stream = builder.consumeTopic(DAGPENGER_BEHOV_PACKET_EVENT)
-        stream.peek { key, packet -> LOGGER.info("Processing $packet with key $key") }
+        stream
+            .peek { key, _ -> LOGGER.info("Pond recieved packet with key $key and will test it against filters.") }
             .filter { key, packet -> filterPredicates().all { it.test(key, packet) } }
-            .foreach { _, packet ->
+            .foreach { key, packet ->
+                LOGGER.info("Packet with key $key passed filters and now calling onPacket() for: $packet")
+
                 val timer = processTimeLatency.startTimer()
                 onPacket(packet)
                 timer.observeDuration()
