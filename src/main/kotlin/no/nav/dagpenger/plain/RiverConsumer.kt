@@ -11,6 +11,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
+import org.apache.kafka.common.errors.RetriableException
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.Future
@@ -44,30 +45,35 @@ abstract class RiverConsumer : ConsumerService() {
         ).use { consumer ->
             consumer.subscribe(listOf(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name))
             while (job.isActive) {
-                val records = consumer.poll(Duration.of(100, ChronoUnit.MILLIS))
-                records.asSequence()
-                    .onEach { r -> LOGGER.info("Pond recieved packet with key ${r.key()} and will test it against filters.") }
-                    .filterNot { r -> r.value().hasProblem() }
-                    .filter { r -> filterPredicates().all { p -> p.test(r) } }
-                    .map { r ->
-                        val result = runCatching {
-                            val timer = processTimeLatency.startTimer()
-                            try {
-                                onPacket(r.value())
-                            } finally {
-                                timer.observeDuration()
+                try {
+                    val records = consumer.poll(Duration.of(100, ChronoUnit.MILLIS))
+
+                    records.asSequence()
+                        .onEach { r -> LOGGER.info("Pond recieved packet with key ${r.key()} and will test it against filters.") }
+                        .filterNot { r -> r.value().hasProblem() }
+                        .filter { r -> filterPredicates().all { p -> p.test(r) } }
+                        .map { r ->
+                            val result = runCatching {
+                                val timer = processTimeLatency.startTimer()
+                                try {
+                                    onPacket(r.value())
+                                } finally {
+                                    timer.observeDuration()
+                                }
                             }
-                        }
-                        when {
-                            result.isFailure -> {
-                                LOGGER.error(result.exceptionOrNull()) { "Failed to process packet ${r.value()}" }
-                                return@map r.key() to onFailure(r.value(), result.exceptionOrNull())
+                            when {
+                                result.isFailure -> {
+                                    LOGGER.error(result.exceptionOrNull()) { "Failed to process packet ${r.value()}" }
+                                    return@map r.key() to onFailure(r.value(), result.exceptionOrNull())
+                                }
+                                else -> r.key() to result.getOrThrow()
                             }
-                            else -> r.key() to result.getOrThrow()
-                        }
-                    }.onEach { (key, packet) ->
-                        LOGGER.info { "Producing packet with key $key and value: $packet" }
-                    }.forEach { (key, packet) -> produceEvent(key, packet) }
+                        }.onEach { (key, packet) ->
+                            LOGGER.info { "Producing packet with key $key and value: $packet" }
+                        }.forEach { (key, packet) -> produceEvent(key, packet) }
+                } catch (e: RetriableException) {
+                    LOGGER.warn("Kafka threw a retriable exception. Will retry", e)
+                }
             }
         }
     }
