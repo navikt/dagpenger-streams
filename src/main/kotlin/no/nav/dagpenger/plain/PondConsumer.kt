@@ -6,6 +6,7 @@ import no.nav.dagpenger.streams.Topics
 import no.nav.dagpenger.streams.streamConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.common.errors.RetriableException
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.function.Predicate
@@ -21,12 +22,16 @@ abstract class PondConsumer : ConsumerService() {
         ).use { consumer ->
             consumer.subscribe(listOf(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name))
             while (job.isActive) {
-                val records = consumer.poll(Duration.of(100, ChronoUnit.MILLIS))
-                records.asSequence()
-                    .onEach { r -> LOGGER.info("Pond recieved packet with ${r.key()} and will test it against filters.") }
-                    .filterNot { r -> r.value().hasProblem() }
-                    .filter { r -> filterPredicates().all { p -> p.test(r) } }
-                    .forEach { r -> onPacket(r.value()) }
+                try {
+                    val records = consumer.poll(Duration.of(100, ChronoUnit.MILLIS))
+                    records.asSequence()
+                        .onEach { r -> LOGGER.info("Pond recieved packet with ${r.key()} and will test it against filters.") }
+                        .filterNot { r -> r.value().hasProblem() }
+                        .filter { r -> filterPredicates().all { p -> p.test(r) } }
+                        .forEach { r -> onPacket(r.value()) }
+                } catch (e: RetriableException) {
+                    LOGGER.warn("Kafka threw a retriable exception, will retry", e)
+                }
             }
         }
     }
