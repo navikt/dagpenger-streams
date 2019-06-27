@@ -20,7 +20,12 @@ import java.util.function.Predicate
 private val LOGGER = KotlinLogging.logger {}
 
 abstract class RiverConsumer : ConsumerService() {
-    val reproducer: KafkaProducer<String, Packet> = KafkaProducer(streamConfig(SERVICE_APP_ID, bootstrapServersConfig))
+    val reproducer: KafkaProducer<String, Packet> = KafkaProducer(producerConfig(
+        clientId = SERVICE_APP_ID,
+        bootstrapServers = bootstrapServersConfig),
+        Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.serializer(),
+        Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.serializer()
+        )
 
     init {
         Runtime.getRuntime().addShutdownHook(Thread {
@@ -33,7 +38,7 @@ abstract class RiverConsumer : ConsumerService() {
 
     override suspend fun run() {
         KafkaConsumer<String, Packet>(
-            streamConfig(SERVICE_APP_ID, bootstrapServersConfig),
+            consumerConfig(groupId = SERVICE_APP_ID, bootstrapServerUrl = bootstrapServersConfig),
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.deserializer(),
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer()
         ).use { consumer ->
