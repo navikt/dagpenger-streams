@@ -5,7 +5,6 @@ import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.events.Problem
 import no.nav.dagpenger.streams.Topics
 import no.nav.dagpenger.streams.processTimeLatency
-import no.nav.dagpenger.streams.streamConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -89,7 +88,7 @@ abstract class RiverConsumer : ConsumerService() {
             )
         ) { metadata, exception ->
             exception?.let { LOGGER.error { "Failed to produce Packet" } }
-            metadata?.let { LOGGER.info { "Produced Packet on topic ${metadata.topic()} to offset ${metadata.offset()} with the key ${key}" } }
+            metadata?.let { LOGGER.info { "Produced Packet on topic ${metadata.topic()} to offset ${metadata.offset()} with the key $key" } }
         }
     }
 
