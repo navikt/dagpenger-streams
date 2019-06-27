@@ -10,8 +10,10 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.RecordMetadata
 import java.time.Duration
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.function.Predicate
 
@@ -22,7 +24,10 @@ abstract class RiverConsumer : ConsumerService() {
 
     init {
         Runtime.getRuntime().addShutdownHook(Thread {
-            reproducer.close(5, TimeUnit.SECONDS)
+            LOGGER.info("Closing $SERVICE_APP_ID Kafka producer")
+            reproducer.flush()
+            reproducer.close()
+            LOGGER.info("done! ")
         })
     }
 
@@ -57,15 +62,26 @@ abstract class RiverConsumer : ConsumerService() {
                         }
                     }.onEach { (key, packet) ->
                         LOGGER.info { "Producing packet with key $key and value: $packet" }
-                    }.forEach { (key, packet) ->
-                        reproducer.send(ProducerRecord(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name, key, packet))
-                    }
+                    }.forEach { (key, packet) -> produceEvent(key, packet) }
             }
         }
     }
 
     abstract fun filterPredicates(): List<Predicate<ConsumerRecord<String, Packet>>>
     abstract fun onPacket(packet: Packet): Packet
+    open fun produceEvent(key: String, packet: Packet): Future<RecordMetadata> {
+        return reproducer.send(
+            ProducerRecord(
+                Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
+                key,
+                packet
+            )
+        ) { metadata, exception ->
+            exception?.let { LOGGER.error { "Failed to produce Packet" } }
+            metadata?.let { LOGGER.info { "Produced Packet on topic ${metadata.topic()} to offset ${metadata.offset()} with the key ${key}" } }
+        }
+    }
+
     open fun onFailure(packet: Packet, error: Throwable?): Packet {
         packet.addProblem(
             Problem(
@@ -74,6 +90,7 @@ abstract class RiverConsumer : ConsumerService() {
         )
         return packet
     }
+
     override fun shutdown() {
         reproducer.close(5, TimeUnit.SECONDS)
     }
