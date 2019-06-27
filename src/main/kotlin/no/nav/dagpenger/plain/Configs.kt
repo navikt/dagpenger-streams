@@ -1,6 +1,5 @@
 package no.nav.dagpenger.plain
 
-import io.confluent.kafka.serializers.KafkaAvroSerializerConfig
 import mu.KotlinLogging
 import no.nav.dagpenger.streams.KafkaCredential
 import org.apache.kafka.clients.CommonClientConfigs
