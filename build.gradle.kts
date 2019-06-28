@@ -59,7 +59,7 @@ dependencies {
     implementation("io.micrometer:micrometer-core:1.1.5")
 
     testImplementation(kotlin("test"))
-    testImplementation(kotlin("test-junit"))
+    testImplementation(kotlin("test-junit5"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:$jupiterVersion")
@@ -68,7 +68,6 @@ dependencies {
     testImplementation("no.nav:kafka-embedded-env:2.0.1")
     testImplementation("org.apache.logging.log4j:log4j-core:2.11.1")
     testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:2.11.1")
-    testImplementation("junit:junit:4.12")
     testImplementation("io.kotlintest:kotlintest-runner-junit5:3.3.0")
 }
 
@@ -121,4 +120,8 @@ spotless {
         target("*.gradle.kts", "additionalScripts/*.gradle.kts")
         ktlint("0.31.0")
     }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
