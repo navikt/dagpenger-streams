@@ -14,6 +14,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.time.Duration
@@ -106,9 +107,45 @@ class RiverConsumerTest {
             return packet
         }
     }
+
+    class ShouldNotRunDueToProblemService : RiverConsumer(embeddedEnvironment.brokersURL) {
+        override fun filterPredicates(): List<Predicate<Packet>> {
+            return emptyList()
+        }
+
+        override fun onPacket(packet: Packet): Packet {
+            if (packet.getProblem() != null) {
+                fail<Packet>("on packet was run for a filtered message")
+            }
+            return packet
+        }
+
+        override val SERVICE_APP_ID: String = "ShouldNotRunOnPacket"
+    }
+
     @Test
     fun `embedded kafka cluster is up and running `() {
         assertEquals(embeddedEnvironment.serverPark.status, KafkaEnvironment.ServerParkStatus.Started)
+    }
+
+    @Test
+    fun `should not run for packets with problems`() {
+        runBlocking {
+            val testService = ShouldNotRunDueToProblemService()
+            testService.start()
+            val packetWithProblem = Packet(jsonString).apply {
+                addProblem(Problem(detail = "ShouldNotBeHere", title = "Failing test"))
+            }
+            val producer =
+                KafkaProducer<String, Packet>(producerConfig("testMessageProducer", embeddedEnvironment.brokersURL))
+            producer.send(ProducerRecord(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name, "test", packetWithProblem))
+                .get(5, TimeUnit.SECONDS)
+            producer.flush()
+            producer.close()
+            delay(2000)
+            testService.stop()
+        }
+
     }
 
     @Test
