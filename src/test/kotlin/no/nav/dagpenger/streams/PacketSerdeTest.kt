@@ -41,10 +41,7 @@ class PacketSerdeTest {
         assertNull(PacketSerializer().serialize("topic", null))
     }
 
-    val jsonString = """
-            {
-                "system_read_count": 5,
-                "key1": "value1",
-            }
-        """.trimIndent()
+    val jsonString by lazy {
+        Packet().apply { putValue("key1", "value1") }.toJson()!!
+    }
 }
