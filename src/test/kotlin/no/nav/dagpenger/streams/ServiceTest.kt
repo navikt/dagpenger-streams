@@ -3,9 +3,9 @@ package no.nav.dagpenger.streams
 import io.kotlintest.shouldBe
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
-import org.junit.AfterClass
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.ServerSocket
@@ -30,13 +30,13 @@ class ServiceTest {
 
         val serviceUnderTest = ServiceUnderTest(httpPort)
 
-        @BeforeClass
+        @BeforeAll
         @JvmStatic
         fun setup() {
             serviceUnderTest.start()
         }
 
-        @AfterClass
+        @AfterAll
         @JvmStatic
         fun teardown() {
             serviceUnderTest.stop()

@@ -120,6 +120,10 @@ class RiverConsumerTest {
             return packet
         }
 
+        override fun getConsumerConfig(credential: KafkaCredential?): Properties {
+            return super.getConsumerConfig(credential).apply { put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") }
+        }
+
         override val SERVICE_APP_ID: String = "ShouldNotRunOnPacket"
     }
 
@@ -145,7 +149,6 @@ class RiverConsumerTest {
             delay(2000)
             testService.stop()
         }
-
     }
 
     @Test
