@@ -3,7 +3,6 @@ package no.nav.dagpenger.plain
 import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.streams.Topics
-import no.nav.dagpenger.streams.streamConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.errors.RetriableException
 import java.time.Duration
@@ -15,7 +14,7 @@ private val LOGGER = KotlinLogging.logger {}
 abstract class PondConsumer(brokerUrl: String) : ConsumerService(brokerUrl) {
     override fun run() {
         KafkaConsumer<String, Packet>(
-            streamConfig(SERVICE_APP_ID, bootstrapServer),
+            getConsumerConfig(),
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.deserializer(),
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer()
         ).use { consumer ->
