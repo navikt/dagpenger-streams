@@ -5,7 +5,6 @@ import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.events.Problem
 import no.nav.dagpenger.streams.Topics
 import no.nav.dagpenger.streams.processTimeLatency
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -19,15 +18,15 @@ import java.util.function.Predicate
 
 private val LOGGER = KotlinLogging.logger {}
 
-abstract class RiverConsumer : ConsumerService() {
-    val reproducer: KafkaProducer<String, Packet> = KafkaProducer(producerConfig(
-        clientId = SERVICE_APP_ID,
-        bootstrapServers = bootstrapServersConfig),
-        Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.serializer(),
-        Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.serializer()
-        )
+abstract class RiverConsumer(brokerUrl: String) : ConsumerService(brokerUrl) {
+    lateinit var reproducer: KafkaProducer<String, Packet>
 
-    init {
+    fun initializeReproducer() {
+        reproducer = KafkaProducer(
+            getProducerConfig(),
+            Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.serializer(),
+            Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.serializer()
+        )
         Runtime.getRuntime().addShutdownHook(Thread {
             LOGGER.info("Closing $SERVICE_APP_ID Kafka producer")
             reproducer.flush()
@@ -35,10 +34,11 @@ abstract class RiverConsumer : ConsumerService() {
             LOGGER.info("done! ")
         })
     }
-
-    override suspend fun run() {
+    override fun run() {
+        if (!::reproducer.isInitialized) { initializeReproducer() }
+        val config = getConsumerConfig()
         KafkaConsumer<String, Packet>(
-            consumerConfig(groupId = SERVICE_APP_ID, bootstrapServerUrl = bootstrapServersConfig),
+            config,
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.deserializer(),
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer()
         ).use { consumer ->
@@ -46,11 +46,10 @@ abstract class RiverConsumer : ConsumerService() {
             while (job.isActive) {
                 try {
                     val records = consumer.poll(Duration.of(100, ChronoUnit.MILLIS))
-
                     records.asSequence()
-                        .onEach { r -> LOGGER.info("Pond recieved packet with key ${r.key()} and will test it against filters.") }
+                        .onEach { r -> LOGGER.info("River recieved packet with key ${r.key()} and will test it against filters.") }
                         .filterNot { r -> r.value().hasProblem() }
-                        .filter { r -> filterPredicates().all { p -> p.test(r) } }
+                        .filter { r -> filterPredicates().all { p -> p.test(r.value()) } }
                         .map { r ->
                             val result = runCatching {
                                 val timer = processTimeLatency.startTimer()
@@ -77,7 +76,7 @@ abstract class RiverConsumer : ConsumerService() {
         }
     }
 
-    abstract fun filterPredicates(): List<Predicate<ConsumerRecord<String, Packet>>>
+    abstract fun filterPredicates(): List<Predicate<Packet>>
     abstract fun onPacket(packet: Packet): Packet
     open fun produceEvent(key: String, packet: Packet): Future<RecordMetadata> {
         return reproducer.send(
@@ -102,6 +101,9 @@ abstract class RiverConsumer : ConsumerService() {
     }
 
     override fun shutdown() {
-        reproducer.close(5, TimeUnit.SECONDS)
+        if (::reproducer.isInitialized) {
+            reproducer.flush()
+            reproducer.close(5, TimeUnit.SECONDS)
+        }
     }
 }

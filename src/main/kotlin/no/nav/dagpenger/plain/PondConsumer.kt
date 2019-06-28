@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.streams.Topics
 import no.nav.dagpenger.streams.streamConfig
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.errors.RetriableException
 import java.time.Duration
@@ -13,10 +12,10 @@ import java.util.function.Predicate
 
 private val LOGGER = KotlinLogging.logger {}
 
-abstract class PondConsumer : ConsumerService() {
-    override suspend fun run() {
+abstract class PondConsumer(brokerUrl: String) : ConsumerService(brokerUrl) {
+    override fun run() {
         KafkaConsumer<String, Packet>(
-            streamConfig(SERVICE_APP_ID, bootstrapServersConfig),
+            streamConfig(SERVICE_APP_ID, bootstrapServer),
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.deserializer(),
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer()
         ).use { consumer ->
@@ -27,7 +26,7 @@ abstract class PondConsumer : ConsumerService() {
                     records.asSequence()
                         .onEach { r -> LOGGER.info("Pond recieved packet with ${r.key()} and will test it against filters.") }
                         .filterNot { r -> r.value().hasProblem() }
-                        .filter { r -> filterPredicates().all { p -> p.test(r) } }
+                        .filter { r -> filterPredicates().all { p -> p.test(r.value()) } }
                         .forEach { r -> onPacket(r.value()) }
                 } catch (e: RetriableException) {
                     LOGGER.warn("Kafka threw a retriable exception, will retry", e)
@@ -36,7 +35,7 @@ abstract class PondConsumer : ConsumerService() {
         }
     }
 
-    abstract fun filterPredicates(): List<Predicate<ConsumerRecord<String, Packet>>>
+    abstract fun filterPredicates(): List<Predicate<Packet>>
     abstract fun onPacket(packet: Packet)
     override fun shutdown() {
     }

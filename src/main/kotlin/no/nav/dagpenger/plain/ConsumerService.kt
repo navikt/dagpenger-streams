@@ -21,33 +21,39 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
+import no.nav.dagpenger.streams.KafkaCredential
+import java.util.Properties
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
 private val LOGGER = KotlinLogging.logger {}
-abstract class ConsumerService : CoroutineScope {
-    protected val bootstrapServersConfig = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
+
+abstract class ConsumerService(
+    val bootstrapServer: String = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
+) : CoroutineScope {
     protected abstract val SERVICE_APP_ID: String
     protected open val HTTP_PORT: Int = 8080
     private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
     private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM)
     private val kafkaConsumerMetrics = KafkaConsumerMetrics()
     private lateinit var applicationEngine: ApplicationEngine
-    lateinit var job: Job
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO
+        get() = Dispatchers.IO + job
+    lateinit var job: Job
 
-    fun start() {
-        kafkaConsumerMetrics.bindTo(registry)
-        DefaultExports.initialize()
-        applicationEngine = naisHttpChecks().start(wait = false)
+    fun start(withHealthServer: Boolean = false) {
+        if (withHealthServer) {
+            kafkaConsumerMetrics.bindTo(registry)
+            DefaultExports.initialize()
+            applicationEngine = naisHttpChecks().start(wait = false)
+        }
         job = Job()
         launch {
             run()
         }
     }
 
-    abstract suspend fun run()
+    abstract fun run()
 
     private fun naisHttpChecks(): ApplicationEngine {
         return embeddedServer(Netty, HTTP_PORT) {
@@ -68,10 +74,20 @@ abstract class ConsumerService : CoroutineScope {
         }
     }
 
+    open fun getConsumerConfig(credential: KafkaCredential? = null): Properties {
+        return consumerConfig(groupId = SERVICE_APP_ID, bootstrapServerUrl = bootstrapServer, credential = credential)
+    }
+
+    open fun getProducerConfig(credential: KafkaCredential? = null): Properties {
+        return producerConfig(clientId = SERVICE_APP_ID + "_producer", bootstrapServers = bootstrapServer, credential = credential)
+    }
+
     fun stop() {
         LOGGER.info { "Shutting down $SERVICE_APP_ID" }
-        applicationEngine.stop(gracePeriod = 3, timeout = 5, timeUnit = TimeUnit.SECONDS)
         job.cancel()
+        if (::applicationEngine.isInitialized) {
+            applicationEngine.stop(gracePeriod = 3, timeout = 5, timeUnit = TimeUnit.SECONDS)
+        }
         shutdown()
     }
 

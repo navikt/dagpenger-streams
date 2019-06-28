@@ -2,11 +2,15 @@ package no.nav.dagpenger.plain
 
 import mu.KotlinLogging
 import no.nav.dagpenger.streams.KafkaCredential
+import no.nav.dagpenger.streams.PacketDeserializer
+import no.nav.dagpenger.streams.PacketSerializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
+import org.apache.kafka.common.serialization.StringDeserializer
+import org.apache.kafka.common.serialization.StringSerializer
 import java.io.File
 import java.util.Properties
 
@@ -15,8 +19,8 @@ fun consumerConfig(
     bootstrapServerUrl: String,
     autoOffsetReset: String = "latest",
     enableAutoCommit: Boolean = true,
-    keyDeserializer: String? = null,
-    valueDeserializer: String? = null,
+    keyDeserializer: String? = StringDeserializer::class.java.name,
+    valueDeserializer: String? = PacketDeserializer::class.java.name,
     credential: KafkaCredential? = null
 ): Properties {
     return Properties().apply {
@@ -37,14 +41,15 @@ fun producerConfig(
     clientId: String,
     bootstrapServers: String,
     acks: String = "1",
-    keySerializer: String? = null,
-    valueSerializer: String? = null,
+    keySerializer: String? = StringSerializer::class.java.name,
+    valueSerializer: String? = PacketSerializer::class.java.name,
     credential: KafkaCredential? = null
 ): Properties {
     return Properties().apply {
         putAll(commonConfig(bootstrapServers, credential))
         put(ProducerConfig.CLIENT_ID_CONFIG, clientId)
         put(ProducerConfig.ACKS_CONFIG, acks)
+        put(ProducerConfig.BATCH_SIZE_CONFIG, "1")
         keySerializer?.let {
             put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, it)
         }
