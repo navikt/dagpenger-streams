@@ -36,7 +36,7 @@ val kotlinLoggingVersion = "1.6.22"
 val ktorVersion = "1.2.0"
 val prometheusVersion = "0.6.0"
 val orgJsonVersion = "20180813"
-val jupiterVersion = "5.3.2"
+val jupiterVersion = "5.4.1"
 val moshiVersion = "1.8.0"
 
 dependencies {
@@ -65,6 +65,9 @@ dependencies {
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:$jupiterVersion")
     testImplementation("org.json:json:$orgJsonVersion")
     testImplementation("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")
+    testImplementation("no.nav:kafka-embedded-env:2.0.1")
+    testImplementation("org.apache.logging.log4j:log4j-core:2.11.1")
+    testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:2.11.1")
     testImplementation("junit:junit:4.12")
     testImplementation("io.kotlintest:kotlintest-runner-junit5:3.3.0")
 }
