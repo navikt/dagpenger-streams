@@ -19,27 +19,25 @@ import io.prometheus.client.hotspot.DefaultExports
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import no.nav.dagpenger.streams.KafkaCredential
 import java.util.Properties
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.CoroutineContext
 
 private val LOGGER = KotlinLogging.logger {}
 
 abstract class ConsumerService(
     val bootstrapServer: String = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
-) : CoroutineScope {
+) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
     protected abstract val SERVICE_APP_ID: String
     protected open val HTTP_PORT: Int = 8080
     private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
     private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM)
     private val kafkaConsumerMetrics = KafkaConsumerMetrics()
     private lateinit var applicationEngine: ApplicationEngine
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
-    lateinit var job: Job
+    protected lateinit var job: Job
 
     fun start(withHealthServer: Boolean = false) {
         if (withHealthServer) {
@@ -47,8 +45,8 @@ abstract class ConsumerService(
             DefaultExports.initialize()
             applicationEngine = naisHttpChecks().start(wait = false)
         }
-        job = Job()
-        launch {
+
+        job = launch {
             run()
         }
     }
@@ -84,11 +82,11 @@ abstract class ConsumerService(
 
     fun stop() {
         LOGGER.info { "Shutting down $SERVICE_APP_ID" }
-        job.cancel()
         if (::applicationEngine.isInitialized) {
             applicationEngine.stop(gracePeriod = 3, timeout = 5, timeUnit = TimeUnit.SECONDS)
         }
         shutdown()
+        this.cancel()
     }
 
     abstract fun shutdown()
