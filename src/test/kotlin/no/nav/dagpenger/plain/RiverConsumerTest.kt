@@ -167,7 +167,7 @@ class RiverConsumerTest {
                 consumerConfig(
                     "test-verifier",
                     embeddedEnvironment.brokersURL,
-                    autoOffsetReset = "earliest"
+                    properties = defaultConsumerConfig.apply { put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") }
                 )
             ).use { consumer ->
                 consumer.subscribe(listOf(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name))
@@ -193,7 +193,7 @@ class RiverConsumerTest {
                 consumerConfig(
                     "test-verifier",
                     embeddedEnvironment.brokersURL,
-                    autoOffsetReset = "earliest"
+                    properties = defaultConsumerConfig.apply { put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") }
                 )
             ).use { consumer ->
                 consumer.subscribe(listOf(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name))
@@ -219,7 +219,7 @@ class RiverConsumerTest {
                 consumerConfig(
                     "test-verifier",
                     embeddedEnvironment.brokersURL,
-                    autoOffsetReset = "earliest"
+                    properties = defaultConsumerConfig.apply { put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") }
                 )
             ).use { consumer ->
                 consumer.subscribe(listOf(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name))
@@ -229,7 +229,7 @@ class RiverConsumerTest {
         }
     }
 
-    val jsonString = """
+    private val jsonString = """
             {
                 "key1": 1,
                 "key2": "value1",
