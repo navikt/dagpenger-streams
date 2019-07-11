@@ -23,7 +23,6 @@ tasks.withType<KotlinCompile> {
 
 group = "com.github.navikt"
 
-
 dependencies {
     implementation(kotlin("stdlib"))
     api(Dagpenger.Events)
