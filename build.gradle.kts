@@ -23,7 +23,6 @@ tasks.withType<KotlinCompile> {
 
 group = "com.github.navikt"
 
-val orgJsonVersion = "20180813"
 
 dependencies {
     implementation(kotlin("stdlib"))
@@ -51,7 +50,7 @@ dependencies {
     testImplementation(Junit5.kotlinRunner)
     testImplementation(Kafka.streamTestUtils)
     testImplementation(KafkaEmbedded.env)
-    testImplementation("org.json:json:$orgJsonVersion")
+    testImplementation(Json.library)
 
     testRuntimeOnly(Junit5.engine)
 }

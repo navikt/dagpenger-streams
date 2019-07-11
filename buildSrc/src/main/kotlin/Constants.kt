@@ -5,6 +5,14 @@
  *  repo sync
  *
  */
+object Assertj {
+    const val version = "3.12.2"
+    const val core = "org.assertj:assertj-core:$version"
+    fun library(name: String) = "org.assertj:assertj-$name:$version"
+}
+object Avro {
+    const val avro = "org.apache.avro:avro:1.9.0"
+}
 
 object Bekk {
     const val nocommons = "no.bekk.bekkopen:nocommons:0.8.2"
@@ -14,6 +22,7 @@ object Cucumber {
     const val version = "4.0.0"
     const val java8 = "io.cucumber:cucumber-java8:$version"
     const val junit = "io.cucumber:cucumber-junit:$version"
+    fun library(name: String) = "io.cucumber:cucumber-$name:$version"
 }
 
 object Dagpenger {
@@ -41,6 +50,7 @@ object Fuel {
     const val version = "2.1.0"
     const val fuel = "com.github.kittinunf.fuel:fuel:$version"
     const val fuelMoshi = "com.github.kittinunf.fuel:fuel-moshi:$version"
+    fun library(name: String) = "com.github.kittinunf.fuel:fuel-$name:$version"
 }
 
 object GradleWrapper {
@@ -48,12 +58,18 @@ object GradleWrapper {
 }
 
 object Junit5 {
-    const val version = "5.4.1"
+    const val version = "5.5.0"
     const val api = "org.junit.jupiter:junit-jupiter-api:$version"
     const val params = "org.junit.jupiter:junit-jupiter-params:$version"
     const val engine = "org.junit.jupiter:junit-jupiter-engine:$version"
     const val vintageEngine = "org.junit.vintage:junit-vintage-engine:$version"
     const val kotlinRunner = "io.kotlintest:kotlintest-runner-junit5:3.3.0"
+    fun library(name: String) = "org.junit.jupiter:junit-jupiter-$name:$version"
+}
+
+object Json {
+    const val version = "20180813"
+    const val library = "org.json:json:$version"
 }
 
 object JsonAssert {
@@ -66,10 +82,11 @@ object Kafka {
     const val clients = "org.apache.kafka:kafka-clients:$version"
     const val streams = "org.apache.kafka:kafka-streams:$version"
     const val streamTestUtils = "org.apache.kafka:kafka-streams-test-utils:$version"
-
+    fun library(name: String) = "org.apache.kafka:kafka-$name:$version"
     object Confluent {
-        const val version = "5.0.2"
+        const val version = "5.0.1"
         const val avroStreamSerdes = "io.confluent:kafka-streams-avro-serde:$version"
+        fun library(name: String) = "io.confluent:$name:$version"
     }
 }
 
@@ -108,6 +125,7 @@ object Ktor {
     const val locations = "io.ktor:ktor-locations:$version"
     const val micrometerMetrics = "io.ktor:ktor-metrics-micrometer:$version"
     const val ktorTest = "io.ktor:ktor-server-test-host:$version"
+    fun library(name: String) = "io.ktor:ktor-$name:$version"
 }
 
 object Log4j2 {
@@ -116,6 +134,7 @@ object Log4j2 {
     const val core = "org.apache.logging.log4j:log4j-core:$version"
     const val slf4j = "org.apache.logging.log4j:log4j-slf4j-impl:$version"
 
+    fun library(name: String) = "org.apache.logging.log4j:log4j-$name:$version"
     object Logstash {
         private const val version = "0.15"
         const val logstashLayout = "com.vlkan.log4j2:log4j2-logstash-layout-fatjar:$version"
@@ -133,6 +152,7 @@ object Moshi {
     const val moshiKotlin = "com.squareup.moshi:moshi-kotlin:$version"
     const val moshiAdapters = "com.squareup.moshi:moshi-adapters:$version"
     const val moshiKtor = "com.ryanharter.ktor:ktor-moshi:1.0.1"
+    fun library(name: String) = "com.squareup.moshi:moshi-$name:$version"
 }
 
 object Mockk {
@@ -150,7 +170,7 @@ object Prometheus {
     const val common = "io.prometheus:simpleclient_common:$version"
     const val hotspot = "io.prometheus:simpleclient_hotspot:$version"
     const val log4j2 = "io.prometheus:simpleclient_log4j2:$version"
-
+    fun library(name: String) = "io.prometheus:simpleclient_$name:$version"
     object Nare {
         const val version = "0b41ab4"
         const val prometheus = "no.nav:nare-prometheus:$version"
