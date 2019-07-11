@@ -7,10 +7,6 @@ plugins {
     id("maven-publish")
 }
 
-apply {
-    plugin(Spotless.spotless)
-}
-
 repositories {
     jcenter()
     maven("http://packages.confluent.io/maven/")
