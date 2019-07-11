@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -25,6 +27,7 @@ dependencies {
 
     implementation(Kafka.clients)
     implementation(Kafka.streams)
+    implementation(Avro.avro)
     implementation(Kafka.Confluent.avroStreamSerdes)
     implementation(Moshi.moshi)
     implementation(Moshi.moshiAdapters)
@@ -103,4 +106,10 @@ spotless {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging {
+        showExceptions = true
+        showStackTraces = true
+        exceptionFormat = TestExceptionFormat.FULL
+        events = setOf(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
+    }
 }
