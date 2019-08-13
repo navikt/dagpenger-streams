@@ -22,7 +22,7 @@ tasks.withType<KotlinCompile> {
 group = "com.github.navikt"
 
 dependencies {
-    implementation(kotlin("stdlib"))
+    implementation(kotlin("stdlib-jdk8"))
     api(Dagpenger.Events)
 
     implementation(Kafka.clients)
@@ -59,6 +59,17 @@ dependencies {
 val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
     from(sourceSets["main"].allSource)
+}
+
+configurations {
+    "implementation" {
+        exclude(group = "org.slf4j", module = "slf4j-log4j12")
+        exclude(group = "ch.qos.logback", module = "logback-classic")
+    }
+    "testImplementation" {
+        exclude(group = "org.slf4j", module = "slf4j-log4j12")
+        exclude(group = "ch.qos.logback", module = "logback-classic")
+    }
 }
 
 publishing {

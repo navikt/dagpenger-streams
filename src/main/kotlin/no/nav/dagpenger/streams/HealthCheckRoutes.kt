@@ -14,6 +14,9 @@ import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
+import mu.KotlinLogging
+
+private val LOGGER = KotlinLogging.logger {}
 
 internal fun Application.health(healthChecks: List<HealthCheck>) {
     install(DefaultHeaders)
@@ -37,8 +40,17 @@ fun Route.healthRoutes(healthChecks: List<HealthCheck>) {
 
     route("/isAlive") {
         get {
-            if (healthChecks.all { it.status() == HealthStatus.UP }) call.respondText("ALIVE", ContentType.Text.Plain) else
+            val failedHealthChecks = healthChecks.filter {
+                it.status() == HealthStatus.DOWN
+            }
+            if (failedHealthChecks.isNotEmpty()) {
+                failedHealthChecks.forEach {
+                    LOGGER.warn { "Health check '${it.name}' failed" }
+                }
                 call.response.status(HttpStatusCode.ServiceUnavailable)
+            } else {
+                call.respondText("ALIVE", ContentType.Text.Plain)
+            }
         }
     }
     route("/isReady") {

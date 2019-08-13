@@ -18,20 +18,21 @@ import java.util.concurrent.TimeUnit
 private val LOGGER = KotlinLogging.logger {}
 private val bootstrapServersConfig = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
 
-abstract class Service : HealthCheck {
+abstract class Service {
     protected abstract val SERVICE_APP_ID: String
     protected open val HTTP_PORT: Int = 8080
-    protected open val healthchecks: List<HealthCheck> = emptyList()
+    protected open val healthChecks: List<HealthCheck> = emptyList()
     protected open val withHealthChecks: Boolean = true
     private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
     private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM)
     private val kafkaConsumerMetrics = KafkaConsumerMetrics().also {
         it.bindTo(registry)
     }
-    private val applicationEngine: ApplicationEngine by lazy {
-        naisHttpChecks(healthchecks + this as HealthCheck)
-    }
     private val streams: KafkaStreams by lazy { setupStreamsInternal() }
+
+    private val applicationEngine: ApplicationEngine by lazy {
+        naisHttpChecks(healthChecks + KafkaStreamHealthCheck(streams))
+    }
 
     fun start() {
         DefaultExports.initialize()
@@ -51,14 +52,6 @@ abstract class Service : HealthCheck {
             stop()
         }
         return streams
-    }
-
-    override fun status(): HealthStatus {
-        return when (streams.state()) {
-            KafkaStreams.State.ERROR -> HealthStatus.DOWN
-            KafkaStreams.State.PENDING_SHUTDOWN -> HealthStatus.DOWN
-            else -> HealthStatus.UP
-        }
     }
 
     private fun naisHttpChecks(healthChecks: List<HealthCheck>): ApplicationEngine {
