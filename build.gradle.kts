@@ -22,7 +22,7 @@ tasks.withType<KotlinCompile> {
 group = "com.github.navikt"
 
 dependencies {
-    implementation(kotlin("stdlib"))
+    implementation(kotlin("stdlib-jdk8"))
     api(Dagpenger.Events)
 
     implementation(Kafka.clients)
@@ -42,10 +42,13 @@ dependencies {
     implementation(Micrometer.prometheusRegistry)
 
     implementation(Log4j2.api)
+    implementation(Log4j2.slf4j)
 
     testImplementation(kotlin("test-junit5"))
     testImplementation(Junit5.api)
     testImplementation(Junit5.kotlinRunner)
+    testImplementation(Mockk.mockk)
+    testImplementation(Ktor.ktorTest)
     testImplementation(Kafka.streamTestUtils)
     testImplementation(KafkaEmbedded.env)
     testImplementation(Json.library)
@@ -56,6 +59,17 @@ dependencies {
 val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
     from(sourceSets["main"].allSource)
+}
+
+configurations {
+    "implementation" {
+        exclude(group = "org.slf4j", module = "slf4j-log4j12")
+        exclude(group = "ch.qos.logback", module = "logback-classic")
+    }
+    "testImplementation" {
+        exclude(group = "org.slf4j", module = "slf4j-log4j12")
+        exclude(group = "ch.qos.logback", module = "logback-classic")
+    }
 }
 
 publishing {

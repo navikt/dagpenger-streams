@@ -1,11 +1,5 @@
 package no.nav.dagpenger.streams
 
-import io.ktor.application.call
-import io.ktor.http.ContentType
-import io.ktor.response.respondText
-import io.ktor.response.respondTextWriter
-import io.ktor.routing.get
-import io.ktor.routing.routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -14,7 +8,6 @@ import io.micrometer.core.instrument.binder.kafka.KafkaConsumerMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.exporter.common.TextFormat
 import io.prometheus.client.hotspot.DefaultExports
 import mu.KotlinLogging
 import org.apache.kafka.streams.KafkaStreams
@@ -28,19 +21,26 @@ private val bootstrapServersConfig = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?:
 abstract class Service {
     protected abstract val SERVICE_APP_ID: String
     protected open val HTTP_PORT: Int = 8080
+    protected open val healthChecks: List<HealthCheck> = emptyList()
+    protected open val withHealthChecks: Boolean = true
     private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
     private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM)
-    private val kafkaConsumerMetrics = KafkaConsumerMetrics()
+    private val kafkaConsumerMetrics = KafkaConsumerMetrics().also {
+        it.bindTo(registry)
+    }
+    private val streams: KafkaStreams by lazy { setupStreamsInternal() }
 
-    private lateinit var streams: KafkaStreams
-    private lateinit var applicationEngine: ApplicationEngine
+    private val applicationEngine: ApplicationEngine by lazy {
+        naisHttpChecks(healthChecks + KafkaStreamHealthCheck(streams))
+    }
+
     fun start() {
-        kafkaConsumerMetrics.bindTo(registry)
         DefaultExports.initialize()
-        applicationEngine = naisHttpChecks().start(wait = false)
-        streams = setupStreamsInternal()
         streams.start()
-        LOGGER.info("Started Service $SERVICE_APP_ID")
+        if (withHealthChecks) {
+            applicationEngine.start(wait = false)
+        }
+        LOGGER.info("Started Service $SERVICE_APP_ID on http port $HTTP_PORT")
         addShutdownHooks()
     }
 
@@ -54,22 +54,9 @@ abstract class Service {
         return streams
     }
 
-    private fun naisHttpChecks(): ApplicationEngine {
+    private fun naisHttpChecks(healthChecks: List<HealthCheck>): ApplicationEngine {
         return embeddedServer(Netty, HTTP_PORT) {
-            routing {
-                get("/isAlive") {
-                    call.respondText("ALIVE", ContentType.Text.Plain)
-                }
-                get("/isReady") {
-                    call.respondText("READY", ContentType.Text.Plain)
-                }
-                get("/metrics") {
-                    val names = call.request.queryParameters.getAll("name[]")?.toSet() ?: setOf()
-                    call.respondTextWriter(ContentType.parse(TextFormat.CONTENT_TYPE_004)) {
-                        TextFormat.write004(this, collectorRegistry.filteredMetricFamilySamples(names))
-                    }
-                }
-            }
+            health(healthChecks)
         }
     }
 
@@ -77,13 +64,15 @@ abstract class Service {
         LOGGER.info { "Shutting down $SERVICE_APP_ID" }
         streams.close(3, TimeUnit.SECONDS)
         streams.cleanUp()
-        applicationEngine.stop(gracePeriod = 3, timeout = 5, timeUnit = TimeUnit.SECONDS)
+        applicationEngine.stop(gracePeriod = 1, timeout = 5, timeUnit = TimeUnit.SECONDS)
     }
 
     // Override and extend the set of properties when needed
     open fun getConfig(): Properties {
         return streamConfig(SERVICE_APP_ID, bootstrapServersConfig)
     }
+
+    abstract fun buildTopology(): Topology
 
     private fun addShutdownHooks() {
         Thread.currentThread().setUncaughtExceptionHandler { t, e ->
@@ -98,6 +87,4 @@ abstract class Service {
             "Uncaught exception in $SERVICE_APP_ID stream, thread: $t message:  ${e.message}", e
         )
     }
-
-    abstract fun buildTopology(): Topology
 }
