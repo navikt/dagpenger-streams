@@ -42,10 +42,13 @@ dependencies {
     implementation(Micrometer.prometheusRegistry)
 
     implementation(Log4j2.api)
+    implementation(Log4j2.slf4j)
 
     testImplementation(kotlin("test-junit5"))
     testImplementation(Junit5.api)
     testImplementation(Junit5.kotlinRunner)
+    testImplementation(Mockk.mockk)
+    testImplementation(Ktor.ktorTest)
     testImplementation(Kafka.streamTestUtils)
     testImplementation(KafkaEmbedded.env)
     testImplementation(Json.library)
