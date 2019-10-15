@@ -1,12 +1,12 @@
 package no.nav.dagpenger.streams
 
 import io.kotlintest.shouldBe
+import io.kotlintest.shouldThrow
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
-import org.junit.AfterClass
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.io.IOException
+import java.net.ConnectException
 import java.net.HttpURLConnection
 import java.net.ServerSocket
 import java.net.URL
@@ -14,33 +14,21 @@ import java.util.Properties
 
 class ServiceTest {
 
-    class ServiceUnderTest(httpPort: Int) : Service() {
+    class ServiceUnderTest(override val withHealthChecks: Boolean, override val healthChecks: List<HealthCheck>) :
+        Service() {
         override fun buildTopology(): Topology = StreamsBuilder().build()
-
         override val SERVICE_APP_ID: String = "under-test"
-        override val HTTP_PORT: Int = httpPort
-
+        override val HTTP_PORT: Int = getAvailablePort()
         override fun getConfig(): Properties {
             return streamConfig(SERVICE_APP_ID, "localhost:${getAvailablePort()}", KafkaCredential("bla", "bla"))
+        }
+
+        fun getPort(): Int {
+            return HTTP_PORT
         }
     }
 
     companion object {
-        val httpPort = getAvailablePort()
-
-        val serviceUnderTest = ServiceUnderTest(httpPort)
-
-        @BeforeClass
-        @JvmStatic
-        fun setup() {
-            serviceUnderTest.start()
-        }
-
-        @AfterClass
-        @JvmStatic
-        fun teardown() {
-            serviceUnderTest.stop()
-        }
 
         fun getAvailablePort(): Int =
             try {
@@ -55,29 +43,44 @@ class ServiceTest {
     }
 
     @Test
-    fun `Should have http alive check`() {
-        assert200okUrl("http://localhost:$httpPort/isAlive")
+    fun `Should be able to turn off health check and metrics api`() {
+        val serviceUnderTest = ServiceUnderTest(withHealthChecks = false, healthChecks = emptyList())
+        serviceUnderTest.start()
+        val port = serviceUnderTest.getPort()
+        shouldThrow<ConnectException> {
+            assertUrl(url = "http://localhost:$port/isAlive", status = 200)
+        }
+        shouldThrow<ConnectException> {
+            assertUrl(url = "http://localhost:$port/isReady", status = 200)
+        }
+        shouldThrow<ConnectException> {
+            assertUrl(url = "http://localhost:$port/metrics", status = 200)
+        }
+        serviceUnderTest.stop()
     }
 
     @Test
-    fun `Should have http ready check`() {
-        assert200okUrl("http://localhost:$httpPort/isReady")
+    fun `Should be able to add configurable health checks to service`() {
+        val serviceUnderTest = ServiceUnderTest(
+            withHealthChecks = true, healthChecks = listOf(
+                object : HealthCheck {
+                    override fun status(): HealthStatus {
+                        return HealthStatus.DOWN
+                    }
+
+                    override val name: String
+                        get() = "FailedHealthCheck"
+                }
+            ))
+        serviceUnderTest.start()
+        val port = serviceUnderTest.getPort()
+        assertUrl(url = "http://localhost:$port/isAlive", status = 503)
+        serviceUnderTest.stop()
     }
 
-    @Test
-    fun `Should have http metrics endpoint check`() {
-        assert200okUrl("http://localhost:$httpPort/metrics")
-    }
-
-    private fun assert200okUrl(urlString: String) {
-        val url = URL(urlString)
-        val con = url.openConnection() as HttpURLConnection
-
-        // optional default is GET
-        con.requestMethod = "GET"
-
+    private fun assertUrl(url: String, status: Int) {
+        val con = URL(url).openConnection() as HttpURLConnection
         val responseCode = con.responseCode
-
-        responseCode shouldBe 200
+        responseCode shouldBe status
     }
 }

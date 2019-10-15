@@ -1,12 +1,12 @@
 package no.nav.dagpenger.streams
 
-import org.junit.Assert.assertNotNull
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
 
 class SchemaTest {
     @Test
     fun testAppHasAGreeting() {
         val classUnderTest = Topics
-        assertNotNull("app should have a greeting", classUnderTest)
+        assertNotNull(classUnderTest, "app should have a greeting")
     }
 }

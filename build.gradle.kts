@@ -1,27 +1,18 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("java-library")
-    kotlin("jvm") version "1.3.21"
-    id("com.diffplug.gradle.spotless") version "3.13.0"
+    kotlin("jvm") version Kotlin.version
+    id(Spotless.spotless) version Spotless.version
     id("maven-publish")
-    id("signing")
-    id("io.codearte.nexus-staging") version "0.20.0"
-    id("de.marcphilipp.nexus-publish") version "0.1.1"
-}
-
-apply {
-    plugin("com.diffplug.gradle.spotless")
 }
 
 repositories {
-    mavenCentral()
+    jcenter()
     maven("http://packages.confluent.io/maven/")
     maven("https://jitpack.io")
-    maven("https://dl.bintray.com/kotlin/ktor")
-    maven("https://dl.bintray.com/kotlin/kotlinx")
-    maven("https://dl.bintray.com/kittinunf/maven")
-    maven("https://oss.sonatype.org/content/repositories/snapshots/")
 }
 
 tasks.withType<KotlinCompile> {
@@ -30,49 +21,55 @@ tasks.withType<KotlinCompile> {
 
 group = "com.github.navikt"
 
-val kafkaVersion = "2.0.1"
-val confluentVersion = "5.0.2"
-val kotlinLoggingVersion = "1.6.22"
-val ktorVersion = "1.2.0"
-val konfigVersion = "1.6.10.0"
-val prometheusVersion = "0.6.0"
-val orgJsonVersion = "20180813"
-val jupiterVersion = "5.3.2"
-val moshiVersion = "1.8.0"
-
 dependencies {
-    implementation(kotlin("stdlib"))
-    api("com.github.navikt:dagpenger-events:2019.06.12-14.01.4b1e1a663635")
+    implementation(kotlin("stdlib-jdk8"))
+    api(Dagpenger.Events)
 
-    implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
-    implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
-    implementation("io.confluent:kafka-streams-avro-serde:$confluentVersion")
-    implementation("com.squareup.moshi:moshi-adapters:$moshiVersion")
-    implementation("com.squareup.moshi:moshi-kotlin:$moshiVersion")
-    implementation("com.squareup.moshi:moshi:$moshiVersion")
+    implementation(Kafka.clients)
+    implementation(Kafka.streams)
+    implementation(Avro.avro)
+    implementation(Kafka.Confluent.avroStreamSerdes)
+    implementation(Moshi.moshi)
+    implementation(Moshi.moshiAdapters)
+    implementation(Moshi.moshiKotlin)
 
-    implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation(Kotlin.Logging.kotlinLogging)
 
-    implementation("com.natpryce:konfig:$konfigVersion")
+    implementation(Ktor.serverNetty)
 
-    implementation("io.prometheus:simpleclient_common:$prometheusVersion")
-    implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
+    implementation(Prometheus.common)
+    implementation(Prometheus.hotspot)
+    implementation(Micrometer.prometheusRegistry)
 
-    testImplementation(kotlin("test"))
-    testImplementation(kotlin("test-junit"))
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:$jupiterVersion")
-    testImplementation("org.json:json:$orgJsonVersion")
-    testImplementation("org.apache.kafka:kafka-streams-test-utils:$kafkaVersion")
-    testImplementation("junit:junit:4.12")
-    testImplementation("io.kotlintest:kotlintest-runner-junit5:3.3.0")
+    implementation(Log4j2.api)
+    implementation(Log4j2.slf4j)
+
+    testImplementation(kotlin("test-junit5"))
+    testImplementation(Junit5.api)
+    testImplementation(Junit5.kotlinRunner)
+    testImplementation(Mockk.mockk)
+    testImplementation(Ktor.ktorTest)
+    testImplementation(Kafka.streamTestUtils)
+    testImplementation(KafkaEmbedded.env)
+    testImplementation(Json.library)
+
+    testRuntimeOnly(Junit5.engine)
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
     from(sourceSets["main"].allSource)
+}
+
+configurations {
+    "implementation" {
+        exclude(group = "org.slf4j", module = "slf4j-log4j12")
+        exclude(group = "ch.qos.logback", module = "logback-classic")
+    }
+    "testImplementation" {
+        exclude(group = "org.slf4j", module = "slf4j-log4j12")
+        exclude(group = "ch.qos.logback", module = "logback-classic")
+    }
 }
 
 publishing {
@@ -113,10 +110,20 @@ publishing {
 
 spotless {
     kotlin {
-        ktlint("0.31.0")
+        ktlint(Klint.version)
     }
     kotlinGradle {
         target("*.gradle.kts", "additionalScripts/*.gradle.kts")
-        ktlint("0.31.0")
+        ktlint(Klint.version)
+    }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+    testLogging {
+        showExceptions = true
+        showStackTraces = true
+        exceptionFormat = TestExceptionFormat.FULL
+        events = setOf(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
     }
 }
