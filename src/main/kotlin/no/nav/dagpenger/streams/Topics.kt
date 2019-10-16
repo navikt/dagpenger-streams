@@ -4,6 +4,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.events.avro.Behov
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.specific.SpecificRecord
@@ -25,10 +26,19 @@ object Topics {
         valueSerde = genericAvro
     )
 
+    @Deprecated(message = "Replaced by 'privat-dagpenger-journalpost-mottatt-v1'", replaceWith = ReplaceWith(
+        "Topics.INNGÅENDE_JOURNALPOST_PACKET")
+    )
     val INNGÅENDE_JOURNALPOST = Topic(
         "privat-dagpenger-journalpost-mottatt-alpha",
         keySerde = strings,
         valueSerde = avroBehovSerde
+    )
+
+    val INNGÅENDE_JOURNALPOST_PACKET_EVENT: Topic<String, Packet> = Topic(
+        "privat-dagpenger-journalpost-mottatt-v1",
+        keySerde = Serdes.String(),
+        valueSerde = packetSerde
     )
 
     val DAGPENGER_BEHOV_PACKET_EVENT = Topic(
