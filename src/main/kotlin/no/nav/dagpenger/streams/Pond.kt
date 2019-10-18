@@ -2,18 +2,17 @@ package no.nav.dagpenger.streams
 
 import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
-import no.nav.dagpenger.streams.Topics.DAGPENGER_BEHOV_PACKET_EVENT
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Predicate
 
 private val LOGGER = KotlinLogging.logger {}
 
-abstract class Pond : Service() {
+abstract class Pond(private val topic: Topic<String, Packet>) : Service() {
 
     override fun buildTopology(): Topology {
         val builder = StreamsBuilder()
-        val stream = builder.consumeTopic(DAGPENGER_BEHOV_PACKET_EVENT)
+        val stream = builder.consumeTopic(topic)
         stream
             .peek { key, _ -> LOGGER.info("Pond recieved packet with key $key and will test it against filters.") }
             .filter { key, packet -> filterPredicates().all { it.test(key, packet) } }
