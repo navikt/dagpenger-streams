@@ -26,7 +26,7 @@ class PondTest {
         }
     }
 
-    class TestPond(val store: MutableList<Packet>) : Pond() {
+    class TestPond(val store: MutableList<Packet>) : Pond(Topics.DAGPENGER_BEHOV_PACKET_EVENT) {
         override val SERVICE_APP_ID = "TestPond"
 
         override fun filterPredicates(): List<Predicate<String, Packet>> {

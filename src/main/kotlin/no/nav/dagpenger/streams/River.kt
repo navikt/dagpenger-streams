@@ -3,18 +3,17 @@ package no.nav.dagpenger.streams
 import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.events.Problem
-import no.nav.dagpenger.streams.Topics.DAGPENGER_BEHOV_PACKET_EVENT
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Predicate
 
 private val LOGGER = KotlinLogging.logger {}
 
-abstract class River : Service() {
+abstract class River(private val topic: Topic<String, Packet>) : Service() {
 
     override fun buildTopology(): Topology {
         val builder = StreamsBuilder()
-        val stream = builder.consumeTopic(DAGPENGER_BEHOV_PACKET_EVENT)
+        val stream = builder.consumeTopic(topic)
         stream
             .peek { key, _ -> LOGGER.info("River recieved packet with key $key and will test it against filters.") }
             .filterNot { _, packet -> packet.hasProblem() }
@@ -39,7 +38,7 @@ abstract class River : Service() {
                 }
             }
             .peek { key, packet -> LOGGER.info("Producing packet with key $key and value: $packet") }
-            .toTopic(DAGPENGER_BEHOV_PACKET_EVENT)
+            .toTopic(topic)
         return builder.build()
     }
 

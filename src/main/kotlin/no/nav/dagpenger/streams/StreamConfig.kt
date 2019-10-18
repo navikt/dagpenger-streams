@@ -14,6 +14,8 @@ import java.util.Properties
 
 private val LOGGER = KotlinLogging.logger {}
 
+private val s = CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG
+
 fun streamConfig(
     appId: String,
     bootStapServerUrl: String,

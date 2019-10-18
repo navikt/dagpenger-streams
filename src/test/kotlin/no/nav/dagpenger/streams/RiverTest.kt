@@ -2,6 +2,7 @@ package no.nav.dagpenger.streams
 
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.events.Problem
+import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.TopologyTestDriver
 import org.apache.kafka.streams.kstream.Predicate
@@ -15,7 +16,17 @@ class RiverTest {
 
     companion object {
 
-        val factory = ConsumerRecordFactory<String, Packet>(
+        private val testTopic = Topic(
+            name = "test-topic",
+            keySerde = Serdes.String(),
+            valueSerde = Serdes.serdeFrom(PacketSerializer(), PacketDeserializer()))
+
+        val factoryForTestTopic = ConsumerRecordFactory<String, Packet>(
+            testTopic.name,
+            testTopic.keySerde.serializer(),
+            testTopic.valueSerde.serializer()
+        )
+        val factoryForDagpengerBehovTopic = ConsumerRecordFactory<String, Packet>(
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.serializer(),
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.serializer()
@@ -27,7 +38,20 @@ class RiverTest {
         }
     }
 
-    class TestService : River() {
+    class TestService : River(Topics.DAGPENGER_BEHOV_PACKET_EVENT) {
+        override val SERVICE_APP_ID = "TestService"
+
+        override fun filterPredicates(): List<Predicate<String, Packet>> {
+            return listOf(Predicate { _, packet -> !packet.hasField("new") })
+        }
+
+        override fun onPacket(packet: Packet): Packet {
+            packet.putValue("new", "newvalue")
+            return packet
+        }
+    }
+
+    class TestTopicService : River(testTopic) {
         override val SERVICE_APP_ID = "TestService"
 
         override fun filterPredicates(): List<Predicate<String, Packet>> {
@@ -45,7 +69,7 @@ class RiverTest {
         val testService = TestService()
 
         TopologyTestDriver(testService.buildTopology(), config).use { topologyTestDriver ->
-            val inputRecord = factory.create(Packet(jsonString))
+            val inputRecord = factoryForDagpengerBehovTopic.create(Packet(jsonString))
             topologyTestDriver.pipeInput(inputRecord)
             val ut = topologyTestDriver.readOutput(
                 Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
@@ -61,7 +85,7 @@ class RiverTest {
         }
     }
 
-    class FailingTestService : River() {
+    class FailingTestService : River(Topics.DAGPENGER_BEHOV_PACKET_EVENT) {
         override val SERVICE_APP_ID = "TestService"
 
         override fun filterPredicates(): List<Predicate<String, Packet>> {
@@ -73,7 +97,7 @@ class RiverTest {
         }
     }
 
-    class FailingTestServiceOnFailure : River() {
+    class FailingTestServiceOnFailure : River(Topics.DAGPENGER_BEHOV_PACKET_EVENT) {
         override val SERVICE_APP_ID = "TestService"
 
         override fun filterPredicates(): List<Predicate<String, Packet>> {
@@ -100,7 +124,7 @@ class RiverTest {
         val testService = FailingTestService()
 
         TopologyTestDriver(testService.buildTopology(), config).use { topologyTestDriver ->
-            val inputRecord = factory.create(Packet(jsonString))
+            val inputRecord = factoryForDagpengerBehovTopic.create(Packet(jsonString))
             topologyTestDriver.pipeInput(inputRecord)
             val ut = topologyTestDriver.readOutput(
                 Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
@@ -119,7 +143,7 @@ class RiverTest {
         val testService = FailingTestServiceOnFailure()
 
         TopologyTestDriver(testService.buildTopology(), config).use { topologyTestDriver ->
-            val inputRecord = factory.create(Packet(jsonString))
+            val inputRecord = factoryForDagpengerBehovTopic.create(Packet(jsonString))
             topologyTestDriver.pipeInput(inputRecord)
             val ut = topologyTestDriver.readOutput(
                 Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
@@ -130,6 +154,26 @@ class RiverTest {
             assertTrue { ut != null }
             assertTrue { ut.value().hasProblem() }
             assertEquals("Fail to process", ut.value().getProblem()?.title)
+        }
+    }
+
+    @Test
+    fun ` Should be able to ovveride topic in River`() {
+        val testService = TestTopicService()
+        TopologyTestDriver(testService.buildTopology(), config).use { topologyTestDriver ->
+            val inputRecord = factoryForTestTopic.create(Packet(jsonString))
+            topologyTestDriver.pipeInput(inputRecord)
+            val ut = topologyTestDriver.readOutput(
+                "test-topic",
+                Serdes.String().deserializer(),
+                PacketDeserializer()
+            )
+
+            assertTrue { ut != null }
+            assertEquals("newvalue", ut.value().getNullableStringValue("new"))
+            assertEquals(1, ut.value().getNullableIntValue("key1"))
+            assertEquals("value1", ut.value().getNullableStringValue("key2"))
+            assertEquals(true, ut.value().getBoolean("key3"))
         }
     }
 
