@@ -33,6 +33,8 @@ dependencies {
     implementation(Moshi.moshiAdapters)
     implementation(Moshi.moshiKotlin)
 
+    implementation(Konfig.konfig)
+
     implementation(Kotlin.Logging.kotlinLogging)
 
     implementation(Ktor.serverNetty)

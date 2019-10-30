@@ -1,5 +1,11 @@
 package no.nav.dagpenger.streams
 
+import com.natpryce.konfig.ConfigurationMap
+import com.natpryce.konfig.ConfigurationProperties
+import com.natpryce.konfig.EnvironmentVariables
+import com.natpryce.konfig.Key
+import com.natpryce.konfig.overriding
+import com.natpryce.konfig.stringType
 import mu.KotlinLogging
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -7,6 +13,7 @@ import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.StreamsConfig.AT_LEAST_ONCE
+import org.apache.kafka.streams.StreamsConfig.EXACTLY_ONCE
 import org.apache.kafka.streams.errors.LogAndFailExceptionHandler
 import java.io.File
 import java.lang.System.getenv
@@ -20,7 +27,8 @@ fun streamConfig(
     appId: String,
     bootStapServerUrl: String,
     credential: KafkaCredential? = null,
-    stateDir: String? = null
+    stateDir: String? = null,
+    configuration: Configuration = Configuration()
 ): Properties {
     return Properties().apply {
         putAll(
@@ -38,6 +46,11 @@ fun streamConfig(
             )
         )
 
+        if (Profile.LOCAL != configuration.profile) {
+            put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, EXACTLY_ONCE)
+            put(StreamsConfig.REPLICATION_FACTOR_CONFIG, "3")
+        }
+
         stateDir?.let { put(StreamsConfig.STATE_DIR_CONFIG, stateDir) }
 
         credential?.let { credential ->
@@ -49,8 +62,7 @@ fun streamConfig(
                 "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${credential.username}\" password=\"${credential.password}\";"
             )
 
-            val trustStoreLocation = getenv("NAV_TRUSTSTORE_PATH")
-            trustStoreLocation?.let {
+            configuration.trustStoreLocation?.let {
                 try {
                     put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL")
                     put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, File(it).absolutePath)
@@ -61,5 +73,39 @@ fun streamConfig(
                 }
             }
         }
+    }
+}
+
+private val localProperties = ConfigurationMap(
+    mapOf(
+        "application.profile" to "LOCAL"
+    )
+)
+private val devProperties = ConfigurationMap(
+    mapOf(
+        "application.profile" to "DEV"
+
+    )
+)
+private val prodProperties = ConfigurationMap(
+    mapOf(
+        "application.profile" to "PROD"
+    )
+)
+
+data class Configuration(
+    val profile: Profile = config()[Key("application.profile", stringType)].let { Profile.valueOf(it) },
+    val trustStoreLocation: String? = config().getOrNull(Key("nav.truststore.path", stringType))
+)
+
+enum class Profile {
+    LOCAL, DEV, PROD
+}
+
+private fun config() = when (getenv("NAIS_CLUSTER_NAME") ?: System.getProperty("NAIS_CLUSTER_NAME")) {
+    "dev-fss" -> ConfigurationProperties.systemProperties() overriding EnvironmentVariables overriding devProperties
+    "prod-fss" -> ConfigurationProperties.systemProperties() overriding EnvironmentVariables overriding prodProperties
+    else -> {
+        ConfigurationProperties.systemProperties() overriding EnvironmentVariables overriding localProperties
     }
 }
