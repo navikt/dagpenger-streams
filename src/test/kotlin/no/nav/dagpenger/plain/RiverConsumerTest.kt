@@ -34,7 +34,7 @@ class RiverConsumerTest {
             autoStart = false,
             withSchemaRegistry = false,
             withSecurity = false,
-            topics = listOf(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name)
+            topicInfos = listOf(KafkaEnvironment.TopicInfo(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name))
         )
 
         @BeforeAll

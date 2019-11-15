@@ -13,7 +13,6 @@ import org.apache.kafka.common.errors.RetriableException
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
 import java.util.function.Predicate
 
 private val LOGGER = KotlinLogging.logger {}
@@ -103,7 +102,7 @@ abstract class RiverConsumer(brokerUrl: String) : ConsumerService(brokerUrl) {
     override fun shutdown() {
         if (::reproducer.isInitialized) {
             reproducer.flush()
-            reproducer.close(5, TimeUnit.SECONDS)
+            reproducer.close(Duration.ofSeconds(5))
         }
     }
 }

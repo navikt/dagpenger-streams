@@ -12,6 +12,7 @@ import io.prometheus.client.hotspot.DefaultExports
 import mu.KotlinLogging
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.Topology
+import java.time.Duration
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 
@@ -62,7 +63,7 @@ abstract class Service {
 
     fun stop() {
         LOGGER.info { "Shutting down $SERVICE_APP_ID" }
-        streams.close(3, TimeUnit.SECONDS)
+        streams.close(Duration.ofSeconds(3))
         streams.cleanUp()
         applicationEngine.stop(gracePeriod = 1, timeout = 5, timeUnit = TimeUnit.SECONDS)
     }
