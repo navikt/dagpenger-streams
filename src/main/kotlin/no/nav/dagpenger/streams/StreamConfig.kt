@@ -13,7 +13,6 @@ import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.StreamsConfig.AT_LEAST_ONCE
-import org.apache.kafka.streams.StreamsConfig.EXACTLY_ONCE
 import org.apache.kafka.streams.errors.LogAndFailExceptionHandler
 import java.io.File
 import java.lang.System.getenv
@@ -47,8 +46,7 @@ fun streamConfig(
         )
 
         if (Profile.LOCAL != configuration.profile) {
-            put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, EXACTLY_ONCE)
-            put(StreamsConfig.REPLICATION_FACTOR_CONFIG, "3")
+            put(StreamsConfig.REPLICATION_FACTOR_CONFIG, "2")
         }
 
         stateDir?.let { put(StreamsConfig.STATE_DIR_CONFIG, stateDir) }
