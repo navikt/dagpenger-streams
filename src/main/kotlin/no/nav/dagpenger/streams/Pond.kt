@@ -24,7 +24,8 @@ abstract class Pond(private val topic: Topic<String, Packet>) : Service() {
                 val timer = processTimeLatency.startTimer()
                 onPacket(packet)
                 timer.observeDuration()
-                ThreadContext.clearAll()
+                ThreadContext.remove(CorrelationId.X_CORRELATION_ID)
+                ThreadContext.remove("vvvv")
             }
         return builder.build()
     }

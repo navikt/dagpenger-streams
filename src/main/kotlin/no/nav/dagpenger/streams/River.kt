@@ -41,7 +41,7 @@ abstract class River(private val topic: Topic<String, Packet>) : Service() {
                 }
             }
             .peek { key, packet -> LOGGER.info("Producing packet with key $key and value: $packet") }
-            .peek { _, _ -> ThreadContext.clearAll() }
+            .peek { _, _ -> ThreadContext.remove(CorrelationId.X_CORRELATION_ID) }
             .toTopic(topic)
         return builder.build()
     }
