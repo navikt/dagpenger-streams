@@ -1,5 +1,6 @@
 package no.nav.dagpenger.streams
 
+import io.kotlintest.shouldNotBe
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.events.Problem
 import org.apache.kafka.common.serialization.Serdes
@@ -7,6 +8,7 @@ import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.TopologyTestDriver
 import org.apache.kafka.streams.kstream.Predicate
 import org.apache.kafka.streams.test.ConsumerRecordFactory
+import org.apache.logging.log4j.ThreadContext
 import org.junit.jupiter.api.Test
 import java.util.Properties
 import kotlin.test.assertEquals
@@ -177,7 +179,39 @@ class RiverTest {
         }
     }
 
-    val jsonString = """
+    @Test
+    fun `Should have correlation id `() {
+        val service = object : River(testTopic) {
+            override val SERVICE_APP_ID: String = "correlation_id"
+
+            override fun filterPredicates(): List<Predicate<String, Packet>> {
+                return listOf(Predicate { _, packet -> !packet.hasField("new") })
+            }
+
+            override fun onPacket(packet: Packet): Packet {
+                packet.putValue("new", "value")
+                ThreadContext.get("x_correlation_id") shouldNotBe null
+                return packet
+            }
+
+            override fun onFailure(packet: Packet, error: Throwable?): Packet {
+                throw AssertionError("No correlation id?", error)
+            }
+        }
+
+        TopologyTestDriver(service.buildTopology(), config).use { topologyTestDriver ->
+            val inputRecord = factoryForTestTopic.create(Packet(jsonString))
+            topologyTestDriver.pipeInput(inputRecord)
+            val ut = topologyTestDriver.readOutput(
+                "test-topic",
+                Serdes.String().deserializer(),
+                PacketDeserializer()
+            )
+            assertTrue { ut != null }
+        }
+    }
+
+    private val jsonString = """
             {
                 "key1": 1,
                 "key2": "value1",

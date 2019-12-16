@@ -1,10 +1,14 @@
 package no.nav.dagpenger.streams
 
+import io.kotlintest.shouldBe
+import io.kotlintest.shouldNotBe
 import no.nav.dagpenger.events.Packet
+import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.TopologyTestDriver
 import org.apache.kafka.streams.kstream.Predicate
 import org.apache.kafka.streams.test.ConsumerRecordFactory
+import org.apache.logging.log4j.ThreadContext
 import org.junit.jupiter.api.Test
 import java.util.Properties
 import kotlin.test.assertEquals
@@ -74,5 +78,26 @@ class PondTest {
             assertTrue { ut == null }
             assertEquals(0, testPond.store.size)
         }
+    }
+
+    @Test
+    fun `Should have correlation id `() {
+        val service = object : Pond(Topics.DAGPENGER_BEHOV_PACKET_EVENT) {
+            override val SERVICE_APP_ID: String = "correlation_id"
+
+            override fun filterPredicates(): List<Predicate<String, Packet>> {
+                return listOf(Predicate { _, packet -> !packet.hasField("new") })
+            }
+
+            override fun onPacket(packet: Packet) {
+                ThreadContext.get("x_correlation_id") shouldNotBe null
+            }
+        }
+
+        TopologyTestDriver(service.buildTopology(), RiverTest.config).use { topologyTestDriver ->
+            val packet = Packet("{}")
+            topologyTestDriver.pipeInput(factory.create(packet))
+        }
+        ThreadContext.get("x_correlation_id") shouldBe null
     }
 }
