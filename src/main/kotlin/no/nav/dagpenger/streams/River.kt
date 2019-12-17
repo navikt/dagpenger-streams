@@ -32,13 +32,12 @@ abstract class River(private val topic: Topic<String, Packet>) : Service() {
                         timer.observeDuration()
                     }
                 }
-                return@mapValues when {
-                    result.isFailure -> {
-                        LOGGER.error(result.exceptionOrNull()) { "Failed to process packet $packet" }
-                        return@mapValues onFailure(packet, result.exceptionOrNull())
-                    }
-                    else -> result.getOrThrow()
-                }
+                return@mapValues result.fold(
+                    { it },
+                    { throwable ->
+                        LOGGER.error(throwable) { "Failed to process packet $packet" }
+                        return@mapValues onFailure(packet, throwable)
+                    })
             }
             .peek { key, packet -> LOGGER.info("Producing packet with key $key and value: $packet") }
             .peek { _, _ -> ThreadContext.remove(CorrelationId.X_CORRELATION_ID) }
