@@ -25,7 +25,6 @@ abstract class Pond(private val topic: Topic<String, Packet>) : Service() {
                 onPacket(packet)
                 timer.observeDuration()
                 ThreadContext.remove(CorrelationId.X_CORRELATION_ID)
-                ThreadContext.remove("vvvv")
             }
         return builder.build()
     }
