@@ -46,6 +46,12 @@ object Topics {
         keySerde = strings,
         valueSerde = packetSerde
     )
+
+    val DAGPENGER_BEHOV_PACKET_EVENT_Q2 = Topic(
+        "privat-dagpenger-behov-v1-q2",
+        keySerde = strings,
+        valueSerde = packetSerde
+    )
 }
 
 fun <K : Any, V : GenericRecord> StreamsBuilder.consumeGenericTopic(
