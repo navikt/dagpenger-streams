@@ -23,7 +23,7 @@ group = "com.github.navikt"
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    api("com.github.navikt:dagpenger-events:task~correlation_id-SNAPSHOT")
+    api("com.github.navikt:dagpenger-events:2019.12.20-09.10.fc5d4304c4bd")
 
     implementation(Kafka.clients)
     implementation(Kafka.streams)
