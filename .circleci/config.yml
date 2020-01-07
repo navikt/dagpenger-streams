@@ -6,6 +6,7 @@ jobs:
     working_directory: ~/repo
     environment:
       - GITHUB_APP_ID: 21626
+      - TESTCONTAINERS_RYUK_DISABLED: true
     steps:
       - checkout
       - setup_remote_docker
