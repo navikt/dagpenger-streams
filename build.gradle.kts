@@ -54,6 +54,7 @@ dependencies {
     testImplementation(Kafka.streamTestUtils)
     testImplementation(KafkaEmbedded.env)
     testImplementation(Json.library)
+    testImplementation(TestContainers.kafka)
 
     testRuntimeOnly(Junit5.engine)
 }
