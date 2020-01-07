@@ -10,6 +10,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.streams.kstream.Predicate
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.KafkaContainer
@@ -18,15 +19,16 @@ import java.time.Duration
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 
-val LOGGER = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger { }
 class CompressionPackageTest {
+
     private object Kafka {
         val instance by lazy {
             KafkaContainer("5.3.0").apply { this.start() }
         }
     }
 
-    class TestService : River(Topics.DAGPENGER_BEHOV_PACKET_EVENT) {
+    class TestServiceThatAddBigData : River(Topics.DAGPENGER_BEHOV_PACKET_EVENT) {
         override val SERVICE_APP_ID = "TestService"
 
         override fun filterPredicates(): List<Predicate<String, Packet>> {
@@ -34,7 +36,7 @@ class CompressionPackageTest {
         }
 
         override fun onPacket(packet: Packet): Packet {
-            packet.putValue("big", RandomStringUtils.random(1000000, "ABC"))
+            packet.putValue("big", RandomStringUtils.random(2000000, "ABC"))
             return packet
         }
 
@@ -55,11 +57,10 @@ class CompressionPackageTest {
 
         val packet = Packet()
 
-        val metaData = producer.send(ProducerRecord(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name, packet)).get(5, TimeUnit.SECONDS)
-        LOGGER.info("Producer produced with meta ${metaData.offset()}")
+        val metaData: RecordMetadata = producer.send(ProducerRecord(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name, packet)).get(5, TimeUnit.SECONDS)
+        logger.info("Producer produced to topic@offset -> '$metaData'")
 
-        val testService = TestService()
-        testService.start()
+        TestServiceThatAddBigData().also { it.start() }
 
         val consumer = KafkaConsumer<String, Packet>(
             consumerConfig(
@@ -72,12 +73,12 @@ class CompressionPackageTest {
 
         consumer.subscribe(listOf(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name))
 
-        Thread.sleep(200)
+        TimeUnit.SECONDS.sleep(3)
 
         val packets = consumer.poll(Duration.ofSeconds(1)).toList()
 
         packets.size shouldBe 2
         packets.last().value().hasField("big")
-        packets.last().value().getStringValue("big").length shouldBe 1000000
+        packets.last().value().getStringValue("big").length shouldBe 2000000
     }
 }

@@ -45,6 +45,10 @@ fun streamConfig(
                 StreamsConfig.producerPrefix(ProducerConfig.COMPRESSION_TYPE_CONFIG) to "snappy",
                 StreamsConfig.producerPrefix(ProducerConfig.BATCH_SIZE_CONFIG) to 32.times(1024).toString(), // 32Kb (default is 16 Kb)
 
+                // Increase max.request.size to 3 MB (default is 1MB )), messages should be compressed but there are currently a bug
+                // in kafka-clients ref https://stackoverflow.com/questions/47696396/kafka-broker-is-not-gzipping-my-bigger-size-message-even-though-i-specified-co/48304851#48304851
+                StreamsConfig.producerPrefix(ProducerConfig.MAX_REQUEST_SIZE_CONFIG) to 3.times(1024).times(1000).toString(),
+
                 StreamsConfig.PROCESSING_GUARANTEE_CONFIG to AT_LEAST_ONCE
             )
         )
