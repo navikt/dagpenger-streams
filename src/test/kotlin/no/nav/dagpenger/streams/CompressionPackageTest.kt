@@ -2,7 +2,6 @@ package no.nav.dagpenger.streams
 
 import io.kotlintest.properties.Gen
 import io.kotlintest.shouldBe
-import io.kotlintest.specs.StringSpec
 import kotlinx.serialization.toUtf8Bytes
 import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
@@ -18,7 +17,6 @@ import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.streams.kstream.Predicate
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.KafkaContainer
-import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils
 import java.time.Duration
 import java.util.Properties
 import java.util.concurrent.TimeUnit
@@ -35,7 +33,7 @@ private data class TestData(val data: String, val number: Int, val double: Doubl
     private val jsonAdapter = moshiInstance.adapter(TestData::class.java)
     fun toJson(): Any? = jsonAdapter.toJsonValue(this)
     companion object {
-        fun generate(): Sequence<TestData> =  generateSequence {
+        fun generate(): Sequence<TestData> = generateSequence {
             TestData(
                 data = Gen.string().random().first(),
                 number = Gen.int().random().first(),
@@ -51,6 +49,7 @@ class CompressionPackageTest {
 
     class TestServiceThatAddBigData : River(Topics.DAGPENGER_BEHOV_PACKET_EVENT) {
         override val SERVICE_APP_ID = "TestService"
+        override val withHealthChecks = false
 
         override fun filterPredicates(): List<Predicate<String, Packet>> {
             return listOf(Predicate { _, packet -> !packet.hasField("big-json") })
