@@ -6,6 +6,7 @@ import no.nav.dagpenger.events.Problem
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Predicate
+import org.apache.logging.log4j.ThreadContext
 
 private val LOGGER = KotlinLogging.logger {}
 
@@ -14,7 +15,9 @@ abstract class River(private val topic: Topic<String, Packet>) : Service() {
     override fun buildTopology(): Topology {
         val builder = StreamsBuilder()
         val stream = builder.consumeTopic(topic)
+
         stream
+            .peek { _, packet -> ThreadContext.put(CorrelationId.X_CORRELATION_ID, packet.getCorrelationId()) }
             .peek { key, _ -> LOGGER.info("River recieved packet with key $key and will test it against filters.") }
             .filterNot { _, packet -> packet.hasProblem() }
             .filter { key, packet -> filterPredicates().all { it.test(key, packet) } }
@@ -29,15 +32,15 @@ abstract class River(private val topic: Topic<String, Packet>) : Service() {
                         timer.observeDuration()
                     }
                 }
-                return@mapValues when {
-                    result.isFailure -> {
-                        LOGGER.error(result.exceptionOrNull()) { "Failed to process packet $packet" }
-                        return@mapValues onFailure(packet, result.exceptionOrNull())
-                    }
-                    else -> result.getOrThrow()
-                }
+                return@mapValues result.fold(
+                    { it },
+                    { throwable ->
+                        LOGGER.error(throwable) { "Failed to process packet $packet" }
+                        return@mapValues onFailure(packet, throwable)
+                    })
             }
             .peek { key, packet -> LOGGER.info("Producing packet with key $key and value: $packet") }
+            .peek { _, _ -> ThreadContext.remove(CorrelationId.X_CORRELATION_ID) }
             .toTopic(topic)
         return builder.build()
     }
