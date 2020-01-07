@@ -1,8 +1,12 @@
 package no.nav.dagpenger.streams
 
+import io.kotlintest.properties.Gen
 import io.kotlintest.shouldBe
+import io.kotlintest.specs.StringSpec
+import kotlinx.serialization.toUtf8Bytes
 import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
+import no.nav.dagpenger.events.moshiInstance
 import no.nav.dagpenger.plain.consumerConfig
 import no.nav.dagpenger.plain.producerConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -20,23 +24,42 @@ import java.util.Properties
 import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger { }
-class CompressionPackageTest {
 
-    private object Kafka {
-        val instance by lazy {
-            KafkaContainer("5.3.0").apply { this.start() }
+private object Kafka {
+    val instance by lazy {
+        KafkaContainer("5.3.0").apply { this.start() }
+    }
+}
+
+private data class TestData(val data: String, val number: Int, val double: Double, val moreData: String) {
+    private val jsonAdapter = moshiInstance.adapter(TestData::class.java)
+    fun toJson(): Any? = jsonAdapter.toJsonValue(this)
+    companion object {
+        fun generate(): Sequence<TestData> =  generateSequence {
+            TestData(
+                data = Gen.string().random().first(),
+                number = Gen.int().random().first(),
+                double = Gen.double().random().first(),
+                moreData = Gen.string().random().first()
+
+            )
         }
     }
+}
+
+class CompressionPackageTest {
 
     class TestServiceThatAddBigData : River(Topics.DAGPENGER_BEHOV_PACKET_EVENT) {
         override val SERVICE_APP_ID = "TestService"
 
         override fun filterPredicates(): List<Predicate<String, Packet>> {
-            return listOf(Predicate { _, packet -> !packet.hasField("big") })
+            return listOf(Predicate { _, packet -> !packet.hasField("big-json") })
         }
 
         override fun onPacket(packet: Packet): Packet {
-            packet.putValue("big", RandomStringUtils.random(2000000, "ABC"))
+            val bigData = TestData.generate().take(7000).toList().map { it.toJson() }
+            packet.putValue("big-json", bigData)
+            logger.info { "Packet size ${packet.toJson()?.toUtf8Bytes()?.size}" }
             return packet
         }
 
@@ -57,7 +80,8 @@ class CompressionPackageTest {
 
         val packet = Packet()
 
-        val metaData: RecordMetadata = producer.send(ProducerRecord(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name, packet)).get(5, TimeUnit.SECONDS)
+        val metaData: RecordMetadata =
+            producer.send(ProducerRecord(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name, packet)).get(5, TimeUnit.SECONDS)
         logger.info("Producer produced to topic@offset -> '$metaData'")
 
         TestServiceThatAddBigData().also { it.start() }
@@ -78,7 +102,6 @@ class CompressionPackageTest {
         val packets = consumer.poll(Duration.ofSeconds(1)).toList()
 
         packets.size shouldBe 2
-        packets.last().value().hasField("big")
-        packets.last().value().getStringValue("big").length shouldBe 2000000
+        packets.last().value().hasField("big-json")
     }
 }
