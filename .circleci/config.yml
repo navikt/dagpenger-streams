@@ -1,4 +1,5 @@
 version: 2
+executorType: machine
 jobs:
   build:
     docker:
@@ -15,7 +16,7 @@ jobs:
 
       - run: ./gradlew check
       - store_test_results:
-          path: sts-klient/build/test-results/test/
+          path: build/test-results/test/
       - run:
           name: Get github creds
           command: |

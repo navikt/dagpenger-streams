@@ -9,6 +9,7 @@ import com.natpryce.konfig.stringType
 import mu.KotlinLogging
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.streams.StreamsConfig
@@ -40,6 +41,13 @@ fun streamConfig(
                 StreamsConfig.COMMIT_INTERVAL_MS_CONFIG to 1,
                 ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
                 StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG to LogAndFailExceptionHandler::class.java,
+
+                StreamsConfig.producerPrefix(ProducerConfig.COMPRESSION_TYPE_CONFIG) to "snappy",
+                StreamsConfig.producerPrefix(ProducerConfig.BATCH_SIZE_CONFIG) to 32.times(1024).toString(), // 32Kb (default is 16 Kb)
+
+                // Increase max.request.size to 3 MB (default is 1MB )), messages should be compressed but there are currently a bug
+                // in kafka-clients ref https://stackoverflow.com/questions/47696396/kafka-broker-is-not-gzipping-my-bigger-size-message-even-though-i-specified-co/48304851#48304851
+                StreamsConfig.producerPrefix(ProducerConfig.MAX_REQUEST_SIZE_CONFIG) to 3.times(1024).times(1000).toString(),
 
                 StreamsConfig.PROCESSING_GUARANTEE_CONFIG to AT_LEAST_ONCE
             )
