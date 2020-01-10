@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger { }
 
-private val testTopic =  Topic(
+private val testTopic = Topic(
     "privat-dagpenger-test",
     keySerde = Serdes.String(),
     valueSerde = Serdes.serdeFrom(PacketSerializer(), PacketDeserializer())
