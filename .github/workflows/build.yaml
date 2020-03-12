@@ -15,8 +15,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '12.x'
-      - name: print desc
-        run: echo ${{ env.CHANGELOG }}
       - name: Cache gradle dependencies
         uses: actions/cache@v1
         with:
