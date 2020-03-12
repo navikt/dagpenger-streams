@@ -41,7 +41,7 @@ jobs:
       - name: Set changelog
         # (Escape newlines see https://github.com/actions/create-release/issues/25)
         run: |
-          text="$(git --no-pager log HEAD...$(git rev-list --tags --max-count=1) --oneline --decorate)"
+          text="$(git --no-pager log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%h %s")"
           text="${text//$'%'/%25}"
           text="${text//$'\n'/%0A}"
           text="${text//$'\r'/%0D}"
@@ -56,6 +56,6 @@ jobs:
           release_name: Release ${{ env.RELEASE_TAG }}
           body: |
             Changes in this Release
-            ${{ github.CHANGELOG }}
+            ${{ env.CHANGELOG }}
           draft: false
           prerelease: false
