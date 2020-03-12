@@ -41,7 +41,7 @@ jobs:
       - name: Set changelog
         # (Escape newlines see https://github.com/actions/create-release/issues/25)
         run: |
-          text="$(git --no-pager log --pretty=oneline HEAD...$(git describe --tags $(git rev-list --tags --max-count=1)))"
+          text="$(git log HEAD...$(git rev-list --tags --max-count=1) --oneline --decorate)"
           text="${text//$'%'/%25}"
           text="${text//$'\n'/%0A}"
           text="${text//$'\r'/%0D}"
