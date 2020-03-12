@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/navikt/dagpenger-streams.svg?style=svg)](https://circleci.com/gh/navikt/dagpenger-streams)
+![Build and deploy](https://github.com/navikt/dagpenger-streams/workflows/Build%20and%20deploy/badge.svg)
 
 [![](https://jitpack.io/v/navikt/dagpenger-streams.svg)](https://jitpack.io/#navikt/dagpenger-streams)
 
