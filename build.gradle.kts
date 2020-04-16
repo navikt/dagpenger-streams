@@ -116,7 +116,7 @@ spotless {
         ktlint(Klint.version)
     }
     kotlinGradle {
-        target("*.gradle.kts", "additionalScripts/*.gradle.kts")
+        target("*.gradle.kts", "buildSrc/**/*.kt*")
         ktlint(Klint.version)
     }
 }
