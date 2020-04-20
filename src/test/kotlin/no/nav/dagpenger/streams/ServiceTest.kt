@@ -1,6 +1,6 @@
 package no.nav.dagpenger.streams
 
-import io.kotlintest.shouldBe
+import io.kotest.matchers.shouldBe
 import io.kotlintest.shouldThrow
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology

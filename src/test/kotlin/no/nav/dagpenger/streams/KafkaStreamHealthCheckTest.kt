@@ -1,6 +1,6 @@
 package no.nav.dagpenger.streams
 
-import io.kotlintest.shouldBe
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import org.apache.kafka.streams.KafkaStreams

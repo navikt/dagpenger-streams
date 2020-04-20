@@ -48,7 +48,9 @@ dependencies {
 
     testImplementation(kotlin("test-junit5"))
     testImplementation(Junit5.api)
-    testImplementation(Junit5.kotlinRunner)
+    testImplementation(KoTest.assertions)
+    testImplementation(KoTest.property)
+    testImplementation(KoTest.runner)
     testImplementation(Mockk.mockk)
     testImplementation(Ktor.ktorTest)
     testImplementation(Kafka.streamTestUtils)

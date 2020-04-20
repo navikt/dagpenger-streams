@@ -1,6 +1,6 @@
 package no.nav.dagpenger.streams
 
-import io.kotlintest.shouldBe
+import io.kotest.matchers.shouldBe
 import io.ktor.application.Application
 import io.ktor.http.HttpMethod
 import io.ktor.server.testing.handleRequest

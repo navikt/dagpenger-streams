@@ -1,6 +1,6 @@
 package no.nav.dagpenger.streams
 
-import io.kotlintest.shouldNotBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.events.Problem
 import org.apache.kafka.common.serialization.Serdes

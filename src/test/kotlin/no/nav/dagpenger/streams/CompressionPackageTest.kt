@@ -1,7 +1,11 @@
 package no.nav.dagpenger.streams
 
-import io.kotlintest.properties.Gen
-import io.kotlintest.shouldBe
+import io.kotest.matchers.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.double
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.next
+import io.kotest.property.arbitrary.string
 import kotlinx.serialization.toUtf8Bytes
 import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
@@ -19,7 +23,7 @@ import org.apache.kafka.streams.kstream.Predicate
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.KafkaContainer
 import java.time.Duration
-import java.util.Properties
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger { }
@@ -43,11 +47,10 @@ private data class TestData(val data: String, val number: Int, val double: Doubl
     companion object {
         fun generate(): Sequence<TestData> = generateSequence {
             TestData(
-                data = Gen.string().random().first(),
-                number = Gen.int().random().first(),
-                double = Gen.double().random().first(),
-                moreData = Gen.string().random().first()
-
+                data = Arb.string().next(),
+                number = Arb.int().next(),
+                double = Arb.double().next(),
+                moreData = Arb.string().next()
             )
         }
     }
