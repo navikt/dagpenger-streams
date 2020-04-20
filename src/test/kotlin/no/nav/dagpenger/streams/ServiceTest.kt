@@ -1,7 +1,7 @@
 package no.nav.dagpenger.streams
 
 import io.kotest.matchers.shouldBe
-import io.kotlintest.shouldThrow
+import io.kotest.assertions.throwables.shouldThrow
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.junit.jupiter.api.Test
