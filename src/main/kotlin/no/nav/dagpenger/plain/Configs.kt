@@ -1,5 +1,7 @@
 package no.nav.dagpenger.plain
 
+import java.io.File
+import java.util.Properties
 import mu.KotlinLogging
 import no.nav.dagpenger.streams.KafkaCredential
 import no.nav.dagpenger.streams.PacketDeserializer
@@ -11,8 +13,6 @@ import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
-import java.io.File
-import java.util.Properties
 
 val defaultConsumerConfig = Properties().apply {
     put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")

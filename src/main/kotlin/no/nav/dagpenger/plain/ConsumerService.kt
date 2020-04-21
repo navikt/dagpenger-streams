@@ -16,15 +16,15 @@ import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
 import io.prometheus.client.hotspot.DefaultExports
+import java.util.Properties
+import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import no.nav.dagpenger.streams.KafkaCredential
-import java.util.Properties
-import java.util.concurrent.TimeUnit
-import kotlin.coroutines.CoroutineContext
 
 private val LOGGER = KotlinLogging.logger {}
 

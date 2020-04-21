@@ -1,6 +1,9 @@
 package no.nav.dagpenger.streams
 
 import io.kotest.matchers.shouldNotBe
+import java.util.Properties
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.events.Problem
 import org.apache.kafka.common.serialization.Serdes
@@ -10,9 +13,6 @@ import org.apache.kafka.streams.kstream.Predicate
 import org.apache.kafka.streams.test.ConsumerRecordFactory
 import org.apache.logging.log4j.ThreadContext
 import org.junit.jupiter.api.Test
-import java.util.Properties
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class RiverTest {
 

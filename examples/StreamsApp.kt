@@ -3,8 +3,8 @@ package no.nav.dagpenger.streams.examples
 import mu.KotlinLogging
 import no.nav.dagpenger.streams.BlurgObject
 import no.nav.dagpenger.streams.Service
-import no.nav.dagpenger.streams.Topics.A_TOPIC_INSTANCE
 import no.nav.dagpenger.streams.Topics.A_NEW_TOPIC_INSTANCE
+import no.nav.dagpenger.streams.Topics.A_TOPIC_INSTANCE
 import no.nav.dagpenger.streams.addShutdownHookAndBlock
 import no.nav.dagpenger.streams.consumeTopic
 import no.nav.dagpenger.streams.toTopic
@@ -42,11 +42,10 @@ class StreamsApp(
         val builder = StreamsBuilder()
         val someStream = builder.consumeTopic(A_TOPIC_INSTANCE)
 
-       someStream
+        someStream
             .peek { key, value -> LOGGER.info("Processing event with key $key and ID ${value.id}") }
             .toTopic(A_NEW_TOPIC_INSTANCE)
 
         return KafkaStreams(builder.build(), streamService.baseConfig(SERVICE_APP_ID))
     }
 }
-

@@ -9,12 +9,12 @@ import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.hotspot.DefaultExports
-import mu.KotlinLogging
-import org.apache.kafka.streams.KafkaStreams
-import org.apache.kafka.streams.Topology
 import java.time.Duration
 import java.util.Properties
 import java.util.concurrent.TimeUnit
+import mu.KotlinLogging
+import org.apache.kafka.streams.KafkaStreams
+import org.apache.kafka.streams.Topology
 
 private val LOGGER = KotlinLogging.logger {}
 private val bootstrapServersConfig = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"

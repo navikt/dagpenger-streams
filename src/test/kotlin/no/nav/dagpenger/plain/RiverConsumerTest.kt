@@ -1,5 +1,11 @@
 package no.nav.dagpenger.plain
 
+import java.time.Duration
+import java.time.temporal.ChronoUnit
+import java.util.Properties
+import java.util.concurrent.TimeUnit
+import java.util.function.Predicate
+import kotlin.test.assertEquals
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.common.JAASCredential
@@ -17,12 +23,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import java.time.Duration
-import java.time.temporal.ChronoUnit
-import java.util.Properties
-import java.util.concurrent.TimeUnit
-import java.util.function.Predicate
-import kotlin.test.assertEquals
 
 class RiverConsumerTest {
     companion object {

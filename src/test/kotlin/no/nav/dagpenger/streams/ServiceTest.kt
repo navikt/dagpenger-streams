@@ -1,16 +1,16 @@
 package no.nav.dagpenger.streams
 
-import io.kotest.matchers.shouldBe
 import io.kotest.assertions.throwables.shouldThrow
-import org.apache.kafka.streams.StreamsBuilder
-import org.apache.kafka.streams.Topology
-import org.junit.jupiter.api.Test
+import io.kotest.matchers.shouldBe
 import java.io.IOException
 import java.net.ConnectException
 import java.net.HttpURLConnection
 import java.net.ServerSocket
 import java.net.URL
 import java.util.Properties
+import org.apache.kafka.streams.StreamsBuilder
+import org.apache.kafka.streams.Topology
+import org.junit.jupiter.api.Test
 
 class ServiceTest {
 

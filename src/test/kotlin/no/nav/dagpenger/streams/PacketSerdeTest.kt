@@ -1,13 +1,13 @@
 package no.nav.dagpenger.streams
 
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlinx.io.core.String
 import no.nav.dagpenger.events.Packet
 import org.apache.kafka.common.errors.SerializationException
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 class PacketSerdeTest {
     @Test
