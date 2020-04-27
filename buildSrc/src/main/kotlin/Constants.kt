@@ -31,7 +31,7 @@ object Dagpenger {
     }
 
     const val Streams = "com.github.navikt:dagpenger-streams:2020.03.12-15.34.55b8a8dbab65"
-    const val Events = "com.github.navikt:dagpenger-events:2020.03.12-15.47.9ee02e57a328"
+    const val Events = "com.github.navikt:dagpenger-events:2020.04.27-16.29.d11aef4d21d1"
 }
 
 object Database {
