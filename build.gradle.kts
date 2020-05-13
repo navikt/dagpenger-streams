@@ -27,6 +27,12 @@ tasks.withType<KotlinCompile> {
 group = "com.github.navikt"
 
 dependencies {
+    constraints {
+        implementation("io.netty:netty-codec-http:4.1.46.Final") {
+            because("previous versions have a vulnerability")
+        }
+    }
+
     implementation(kotlin("stdlib-jdk8"))
     api("com.github.navikt:dagpenger-events:2019.12.20-09.10.fc5d4304c4bd")
 
