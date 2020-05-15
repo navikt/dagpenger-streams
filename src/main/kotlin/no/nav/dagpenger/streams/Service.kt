@@ -11,7 +11,6 @@ import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.hotspot.DefaultExports
 import java.time.Duration
 import java.util.Properties
-import java.util.concurrent.TimeUnit
 import mu.KotlinLogging
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.Topology
@@ -65,7 +64,7 @@ abstract class Service {
         LOGGER.info { "Shutting down $SERVICE_APP_ID" }
         streams.close(Duration.ofSeconds(3))
         streams.cleanUp()
-        applicationEngine.stop(gracePeriod = 1, timeout = 5, timeUnit = TimeUnit.SECONDS)
+        applicationEngine.stop(gracePeriodMillis = 3000, timeoutMillis = 5000)
     }
 
     // Override and extend the set of properties when needed

@@ -2,7 +2,6 @@ package no.nav.dagpenger.streams
 
 import java.lang.Exception
 import java.nio.charset.StandardCharsets
-import kotlinx.io.core.String
 import no.nav.dagpenger.events.Packet
 import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.serialization.Deserializer
