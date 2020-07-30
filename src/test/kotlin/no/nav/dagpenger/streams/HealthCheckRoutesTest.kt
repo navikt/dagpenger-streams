@@ -12,9 +12,11 @@ import org.junit.jupiter.api.Test
 class HealthApplicationTest {
 
     val goodHealthChecks: List<HealthCheck>
-        get() = listOf(mockk<HealthCheck>().also {
-            every { it.status() } returns HealthStatus.UP
-        })
+        get() = listOf(
+            mockk<HealthCheck>().also {
+                every { it.status() } returns HealthStatus.UP
+            }
+        )
 
     @Test
     fun `Should have alive, ready and metrics endpoints`() = withTestApplication(api(goodHealthChecks)) {
@@ -30,9 +32,11 @@ class HealthApplicationTest {
     }
 
     val badHealthChecks: List<HealthCheck>
-        get() = listOf(mockk<HealthCheck>().also {
-            every { it.status() } returns HealthStatus.DOWN
-        })
+        get() = listOf(
+            mockk<HealthCheck>().also {
+                every { it.status() } returns HealthStatus.DOWN
+            }
+        )
 
     @Test
     fun `alive check should fail if a healtcheck is down `() = withTestApplication(api(badHealthChecks)) {

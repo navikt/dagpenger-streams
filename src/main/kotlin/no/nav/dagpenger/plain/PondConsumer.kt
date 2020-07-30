@@ -1,13 +1,13 @@
 package no.nav.dagpenger.plain
 
-import java.time.Duration
-import java.time.temporal.ChronoUnit
-import java.util.function.Predicate
 import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.streams.Topics
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.errors.RetriableException
+import java.time.Duration
+import java.time.temporal.ChronoUnit
+import java.util.function.Predicate
 
 private val LOGGER = KotlinLogging.logger {}
 

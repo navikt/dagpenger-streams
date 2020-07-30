@@ -1,11 +1,11 @@
 package no.nav.dagpenger.streams
 
-import java.lang.Exception
-import java.nio.charset.StandardCharsets
 import no.nav.dagpenger.events.Packet
 import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.Serializer
+import java.lang.Exception
+import java.nio.charset.StandardCharsets
 
 class PacketSerializer : Serializer<Packet> {
     override fun configure(configs: MutableMap<String, *>?, isKey: Boolean) {}
