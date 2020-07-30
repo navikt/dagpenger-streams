@@ -2,15 +2,15 @@ package no.nav.dagpenger.streams
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import org.apache.kafka.streams.StreamsBuilder
+import org.apache.kafka.streams.Topology
+import org.junit.jupiter.api.Test
 import java.io.IOException
 import java.net.ConnectException
 import java.net.HttpURLConnection
 import java.net.ServerSocket
 import java.net.URL
 import java.util.Properties
-import org.apache.kafka.streams.StreamsBuilder
-import org.apache.kafka.streams.Topology
-import org.junit.jupiter.api.Test
 
 class ServiceTest {
 
@@ -62,7 +62,8 @@ class ServiceTest {
     @Test
     fun `Should be able to add configurable health checks to service`() {
         val serviceUnderTest = ServiceUnderTest(
-            withHealthChecks = true, healthChecks = listOf(
+            withHealthChecks = true,
+            healthChecks = listOf(
                 object : HealthCheck {
                     override fun status(): HealthStatus {
                         return HealthStatus.DOWN
@@ -71,7 +72,8 @@ class ServiceTest {
                     override val name: String
                         get() = "FailedHealthCheck"
                 }
-            ))
+            )
+        )
         serviceUnderTest.start()
         val port = serviceUnderTest.getPort()
         assertUrl(url = "http://localhost:$port/isAlive", status = 503)

@@ -1,9 +1,5 @@
 package no.nav.dagpenger.plain
 
-import java.time.Duration
-import java.time.temporal.ChronoUnit
-import java.util.concurrent.Future
-import java.util.function.Predicate
 import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.events.Problem
@@ -14,6 +10,10 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.errors.RetriableException
+import java.time.Duration
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.Future
+import java.util.function.Predicate
 
 private val LOGGER = KotlinLogging.logger {}
 
@@ -26,12 +26,14 @@ abstract class RiverConsumer(brokerUrl: String) : ConsumerService(brokerUrl) {
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.serializer(),
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.serializer()
         )
-        Runtime.getRuntime().addShutdownHook(Thread {
-            LOGGER.info("Closing $SERVICE_APP_ID Kafka producer")
-            reproducer.flush()
-            reproducer.close()
-            LOGGER.info("done! ")
-        })
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                LOGGER.info("Closing $SERVICE_APP_ID Kafka producer")
+                reproducer.flush()
+                reproducer.close()
+                LOGGER.info("done! ")
+            }
+        )
     }
     override fun run() {
         if (!::reproducer.isInitialized) { initializeReproducer() }

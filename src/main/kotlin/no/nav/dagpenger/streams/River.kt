@@ -37,7 +37,8 @@ abstract class River(private val topic: Topic<String, Packet>) : Service() {
                     { throwable ->
                         LOGGER.error(throwable) { "Failed to process packet $packet" }
                         return@mapValues onFailure(packet, throwable)
-                    })
+                    }
+                )
             }
             .peek { key, packet -> LOGGER.debug { "Producing packet with key $key and value: $packet" } }
             .peek { _, _ -> ThreadContext.remove(CorrelationId.X_CORRELATION_ID) }

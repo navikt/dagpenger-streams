@@ -2,9 +2,6 @@ package no.nav.dagpenger.streams
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import java.util.Properties
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import no.nav.dagpenger.events.Packet
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.TopologyTestDriver
@@ -12,6 +9,9 @@ import org.apache.kafka.streams.kstream.Predicate
 import org.apache.kafka.streams.test.ConsumerRecordFactory
 import org.apache.logging.log4j.ThreadContext
 import org.junit.jupiter.api.Test
+import java.util.Properties
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class PondTest {
 

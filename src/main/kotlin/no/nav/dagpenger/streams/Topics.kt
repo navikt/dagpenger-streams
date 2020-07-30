@@ -26,8 +26,11 @@ object Topics {
         valueSerde = genericAvro
     )
 
-    @Deprecated(message = "Replaced by 'privat-dagpenger-journalpost-mottatt-v1'", replaceWith = ReplaceWith(
-        "Topics.INNGÅENDE_JOURNALPOST_PACKET")
+    @Deprecated(
+        message = "Replaced by 'privat-dagpenger-journalpost-mottatt-v1'",
+        replaceWith = ReplaceWith(
+            "Topics.INNGÅENDE_JOURNALPOST_PACKET"
+        )
     )
     val INNGÅENDE_JOURNALPOST = Topic(
         "privat-dagpenger-journalpost-mottatt-alpha",
@@ -57,13 +60,15 @@ fun <K : Any, V : GenericRecord> StreamsBuilder.consumeGenericTopic(
         topic.keySerde.configure(
             mapOf(
                 AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl
-            ), true
+            ),
+            true
         )
 
         topic.valueSerde.configure(
             mapOf(
                 AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl
-            ), false
+            ),
+            false
         )
     }
 
@@ -81,13 +86,15 @@ fun <K : Any, V : SpecificRecord> StreamsBuilder.consumeTopic(
         topic.keySerde.configure(
             mapOf(
                 AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl
-            ), true
+            ),
+            true
         )
 
         topic.valueSerde.configure(
             mapOf(
                 AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl
-            ), false
+            ),
+            false
         )
     }
 
@@ -113,14 +120,16 @@ fun <K, V> KStream<K, V>.toTopic(topic: Topic<K, V>, schemaRegistryUrl: String?)
         topic.keySerde.configure(
             mapOf(
                 AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl
-            ), true
+            ),
+            true
         )
 
         topic.valueSerde.configure(
             mapOf(
                 KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG to true,
                 AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl
-            ), false
+            ),
+            false
         )
     }
     return to(topic.name, Produced.with(topic.keySerde, topic.valueSerde))

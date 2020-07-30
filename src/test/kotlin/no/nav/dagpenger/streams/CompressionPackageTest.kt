@@ -6,9 +6,6 @@ import io.kotest.property.arbitrary.double
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.next
 import io.kotest.property.arbitrary.string
-import java.time.Duration
-import java.util.Properties
-import java.util.concurrent.TimeUnit
 import kotlinx.serialization.toUtf8Bytes
 import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
@@ -25,6 +22,9 @@ import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.kstream.Predicate
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.KafkaContainer
+import java.time.Duration
+import java.util.Properties
+import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger { }
 
@@ -109,7 +109,8 @@ class CompressionPackageTest {
                 bootstrapServers = Kafka.instance.bootstrapServers
             ).also {
                 it[ProducerConfig.ACKS_CONFIG] = "all"
-            })
+            }
+        )
 
         val packet = Packet()
 
@@ -148,7 +149,8 @@ class CompressionPackageTest {
                 bootstrapServers = Kafka.instance.bootstrapServers
             ).also {
                 it[ProducerConfig.ACKS_CONFIG] = "all"
-            })
+            }
+        )
 
         val packet = Packet()
 
