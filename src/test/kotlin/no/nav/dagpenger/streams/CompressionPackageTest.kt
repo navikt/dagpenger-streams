@@ -6,7 +6,9 @@ import io.kotest.property.arbitrary.double
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.next
 import io.kotest.property.arbitrary.string
-import kotlinx.serialization.toUtf8Bytes
+import java.time.Duration
+import java.util.Properties
+import java.util.concurrent.TimeUnit
 import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.events.moshiInstance
@@ -22,9 +24,6 @@ import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.kstream.Predicate
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.KafkaContainer
-import java.time.Duration
-import java.util.Properties
-import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger { }
 
@@ -69,7 +68,6 @@ class CompressionPackageTest {
         override fun onPacket(packet: Packet): Packet {
             val bigData = TestData.generate().take(7000).toList().map { it.toJson() }
             packet.putValue("big-json", bigData)
-            logger.info { "Packet size ${packet.toJson()?.toUtf8Bytes()?.size}" }
             return packet
         }
 
@@ -92,7 +90,6 @@ class CompressionPackageTest {
                 "big-json", largeJson
 
             )
-            logger.info { "Packet size ${packet.toJson()?.toUtf8Bytes()?.size}" }
             return packet
         }
 
