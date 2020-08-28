@@ -87,7 +87,8 @@ class CompressionPackageTest {
         override fun onPacket(packet: Packet): Packet {
             val largeJson = this::class.java.getResource("/unormalt-stor-json.json").readText()
             packet.putValue(
-                "big-json", largeJson
+                "big-json",
+                largeJson
 
             )
             return packet

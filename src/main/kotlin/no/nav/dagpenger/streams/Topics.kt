@@ -73,7 +73,8 @@ fun <K : Any, V : GenericRecord> StreamsBuilder.consumeGenericTopic(
     }
 
     return stream<K, V>(
-        topic.name, Consumed.with(topic.keySerde, topic.valueSerde)
+        topic.name,
+        Consumed.with(topic.keySerde, topic.valueSerde)
     )
 }
 
@@ -99,7 +100,8 @@ fun <K : Any, V : SpecificRecord> StreamsBuilder.consumeTopic(
     }
 
     return stream<K, V>(
-        topic.name, Consumed.with(topic.keySerde, topic.valueSerde)
+        topic.name,
+        Consumed.with(topic.keySerde, topic.valueSerde)
     )
 }
 
@@ -107,7 +109,8 @@ fun <K : Any, V> StreamsBuilder.consumeTopic(
     topic: Topic<K, V>
 ): KStream<K, V> {
     return stream<K, V>(
-        topic.name, Consumed.with(topic.keySerde, topic.valueSerde)
+        topic.name,
+        Consumed.with(topic.keySerde, topic.valueSerde)
     )
 }
 

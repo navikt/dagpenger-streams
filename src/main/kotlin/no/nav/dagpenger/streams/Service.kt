@@ -84,7 +84,8 @@ abstract class Service {
 
     private fun logUnexpectedError(t: Thread?, e: Throwable) {
         LOGGER.error(
-            "Uncaught exception in $SERVICE_APP_ID stream, thread: $t message:  ${e.message}", e
+            "Uncaught exception in $SERVICE_APP_ID stream, thread: $t message:  ${e.message}",
+            e
         )
     }
 }
