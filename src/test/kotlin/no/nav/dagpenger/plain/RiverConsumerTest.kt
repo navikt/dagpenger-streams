@@ -2,8 +2,6 @@ package no.nav.dagpenger.plain
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import no.nav.common.JAASCredential
-import no.nav.common.KafkaEnvironment
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.events.Problem
 import no.nav.dagpenger.streams.KafkaCredential
@@ -12,45 +10,26 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.utility.DockerImageName
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 import java.util.function.Predicate
-import kotlin.test.assertEquals
 
 class RiverConsumerTest {
-    companion object {
-        private const val username = "srvkafkaclient"
-        private const val password = "kafkaclient"
 
-        val embeddedEnvironment = KafkaEnvironment(
-            users = listOf(JAASCredential(username, password)),
-            autoStart = false,
-            withSchemaRegistry = false,
-            withSecurity = false,
-            topicInfos = listOf(KafkaEnvironment.TopicInfo(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name))
-        )
-
-        @BeforeAll
-        @JvmStatic
-        fun start() {
-            embeddedEnvironment.start()
-        }
-
-        @AfterAll
-        @JvmStatic
-        fun stop() {
-            embeddedEnvironment.tearDown()
+    private object Kafka {
+        val instance by lazy {
+            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka").withTag("5.3.0")).apply { this.start() }
         }
     }
 
-    class TestService : RiverConsumer(embeddedEnvironment.brokersURL) {
+    class TestService : RiverConsumer(Kafka.instance.bootstrapServers) {
         override fun filterPredicates(): List<Predicate<Packet>> {
             return listOf(Predicate { r -> !r.hasField("new") })
         }
@@ -67,7 +46,7 @@ class RiverConsumerTest {
         override val SERVICE_APP_ID: String = "TestService"
     }
 
-    class FailingTestService : RiverConsumer(embeddedEnvironment.brokersURL) {
+    class FailingTestService : RiverConsumer(Kafka.instance.bootstrapServers) {
         override fun filterPredicates(): List<Predicate<Packet>> {
             return listOf(Predicate { packet -> !packet.hasField("new") })
         }
@@ -83,7 +62,7 @@ class RiverConsumerTest {
         override val SERVICE_APP_ID: String = "FailingTestService"
     }
 
-    class FailingTestServiceOnFailure : RiverConsumer(embeddedEnvironment.brokersURL) {
+    class FailingTestServiceOnFailure : RiverConsumer(Kafka.instance.bootstrapServers) {
         override val SERVICE_APP_ID = "TestServiceOnFailure"
 
         override fun filterPredicates(): List<Predicate<Packet>> {
@@ -108,7 +87,7 @@ class RiverConsumerTest {
         }
     }
 
-    class ShouldNotRunDueToProblemService : RiverConsumer(embeddedEnvironment.brokersURL) {
+    class ShouldNotRunDueToProblemService : RiverConsumer(Kafka.instance.bootstrapServers) {
         override fun filterPredicates(): List<Predicate<Packet>> {
             return emptyList()
         }
@@ -128,11 +107,6 @@ class RiverConsumerTest {
     }
 
     @Test
-    fun `embedded kafka cluster is up and running `() {
-        assertEquals(embeddedEnvironment.serverPark.status, KafkaEnvironment.ServerParkStatus.Started)
-    }
-
-    @Test
     fun `should not run for packets with problems`() {
         runBlocking {
             val testService = ShouldNotRunDueToProblemService()
@@ -141,7 +115,7 @@ class RiverConsumerTest {
                 addProblem(Problem(detail = "ShouldNotBeHere", title = "Failing test"))
             }
             val producer =
-                KafkaProducer<String, Packet>(producerConfig("testMessageProducer", embeddedEnvironment.brokersURL))
+                KafkaProducer<String, Packet>(producerConfig("testMessageProducer", Kafka.instance.bootstrapServers))
             producer.send(ProducerRecord(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name, "test", packetWithProblem))
                 .get(5, TimeUnit.SECONDS)
             producer.flush()
@@ -157,7 +131,7 @@ class RiverConsumerTest {
             val testService = TestService()
             testService.start()
             val producer =
-                KafkaProducer<String, Packet>(producerConfig("testMessageProducer", embeddedEnvironment.brokersURL))
+                KafkaProducer<String, Packet>(producerConfig("testMessageProducer", Kafka.instance.bootstrapServers))
             producer.send(ProducerRecord(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name, "test", Packet(jsonString)))
                 .get(5, TimeUnit.SECONDS)
             producer.flush()
@@ -166,7 +140,7 @@ class RiverConsumerTest {
             KafkaConsumer<String, Packet>(
                 consumerConfig(
                     "test-verifier",
-                    embeddedEnvironment.brokersURL,
+                    Kafka.instance.bootstrapServers,
                     properties = defaultConsumerConfig.apply { put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") }
                 )
             ).use { consumer ->
@@ -184,7 +158,7 @@ class RiverConsumerTest {
             val testService = FailingTestService()
             testService.start()
             val producer =
-                KafkaProducer<String, Packet>(producerConfig("testMessageProducer", embeddedEnvironment.brokersURL))
+                KafkaProducer<String, Packet>(producerConfig("testMessageProducer", Kafka.instance.bootstrapServers))
             producer.send(ProducerRecord(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name, "test", Packet(jsonString)))
                 .get(5, TimeUnit.SECONDS)
             producer.flush()
@@ -192,7 +166,7 @@ class RiverConsumerTest {
             KafkaConsumer<String, Packet>(
                 consumerConfig(
                     "test-verifier",
-                    embeddedEnvironment.brokersURL,
+                    Kafka.instance.bootstrapServers,
                     properties = defaultConsumerConfig.apply { put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") }
                 )
             ).use { consumer ->
@@ -209,7 +183,7 @@ class RiverConsumerTest {
         runBlocking {
             val testService = FailingTestServiceOnFailure()
             val producer =
-                KafkaProducer<String, Packet>(producerConfig("testMessageProducer", embeddedEnvironment.brokersURL))
+                KafkaProducer<String, Packet>(producerConfig("testMessageProducer", Kafka.instance.bootstrapServers))
             testService.start()
             producer.send(ProducerRecord(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name, "test", Packet(jsonString)))
                 .get(5, TimeUnit.SECONDS)
@@ -218,7 +192,7 @@ class RiverConsumerTest {
             KafkaConsumer<String, Packet>(
                 consumerConfig(
                     "test-verifier",
-                    embeddedEnvironment.brokersURL,
+                    Kafka.instance.bootstrapServers,
                     properties = defaultConsumerConfig.apply { put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") }
                 )
             ).use { consumer ->

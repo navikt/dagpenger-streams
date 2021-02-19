@@ -59,7 +59,6 @@ dependencies {
     testImplementation(Mockk.mockk)
     testImplementation(Ktor.ktorTest)
     testImplementation(Kafka.streamTestUtils)
-    testImplementation(KafkaEmbedded.env)
     testImplementation(Json.library)
     testImplementation(TestContainers.kafka)
 

@@ -21,8 +21,6 @@ import java.util.Properties
 
 private val LOGGER = KotlinLogging.logger {}
 
-private val s = CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG
-
 fun streamConfig(
     appId: String,
     bootStapServerUrl: String,
@@ -47,7 +45,7 @@ fun streamConfig(
 
                 // Increase max.request.size to 3 MB (default is 1MB )), messages should be compressed but there are currently a bug
                 // in kafka-clients ref https://stackoverflow.com/questions/47696396/kafka-broker-is-not-gzipping-my-bigger-size-message-even-though-i-specified-co/48304851#48304851
-                StreamsConfig.producerPrefix(ProducerConfig.MAX_REQUEST_SIZE_CONFIG) to 3.times(1024).times(1000).toString(),
+                StreamsConfig.producerPrefix(ProducerConfig.MAX_REQUEST_SIZE_CONFIG) to 5.times(1024).times(1000).toString(),
 
                 StreamsConfig.PROCESSING_GUARANTEE_CONFIG to AT_LEAST_ONCE
             )

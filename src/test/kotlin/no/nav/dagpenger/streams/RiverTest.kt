@@ -3,11 +3,15 @@ package no.nav.dagpenger.streams
 import io.kotest.matchers.shouldNotBe
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.events.Problem
+import no.nav.dagpenger.streams.Helpers.keyDeSerializer
+import no.nav.dagpenger.streams.Helpers.keySerializer
+import no.nav.dagpenger.streams.Helpers.topicName
+import no.nav.dagpenger.streams.Helpers.valueDeSerializer
+import no.nav.dagpenger.streams.Helpers.valueSerializer
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.TopologyTestDriver
 import org.apache.kafka.streams.kstream.Predicate
-import org.apache.kafka.streams.test.ConsumerRecordFactory
 import org.apache.logging.log4j.ThreadContext
 import org.junit.jupiter.api.Test
 import java.util.Properties
@@ -22,17 +26,6 @@ class RiverTest {
             name = "test-topic",
             keySerde = Serdes.String(),
             valueSerde = Serdes.serdeFrom(PacketSerializer(), PacketDeserializer())
-        )
-
-        val factoryForTestTopic = ConsumerRecordFactory<String, Packet>(
-            testTopic.name,
-            testTopic.keySerde.serializer(),
-            testTopic.valueSerde.serializer()
-        )
-        val factoryForDagpengerBehovTopic = ConsumerRecordFactory<String, Packet>(
-            Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
-            Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.serializer(),
-            Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.serializer()
         )
 
         val config = Properties().apply {
@@ -72,19 +65,26 @@ class RiverTest {
         val testService = TestService()
 
         TopologyTestDriver(testService.buildTopology(), config).use { topologyTestDriver ->
-            val inputRecord = factoryForDagpengerBehovTopic.create(Packet(jsonString))
-            topologyTestDriver.pipeInput(inputRecord)
-            val ut = topologyTestDriver.readOutput(
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.deserializer(),
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer()
+
+            val input = topologyTestDriver.createInputTopic(
+                topicName,
+                keySerializer,
+                valueSerializer
             )
 
+            input.pipeInput(Packet(jsonString))
+
+            val ut = topologyTestDriver.createOutputTopic(
+                topicName,
+                keyDeSerializer,
+                valueDeSerializer
+            ).readKeyValue().value
+
             assertTrue { ut != null }
-            assertEquals("newvalue", ut.value().getNullableStringValue("new"))
-            assertEquals(1, ut.value().getNullableIntValue("key1"))
-            assertEquals("value1", ut.value().getNullableStringValue("key2"))
-            assertEquals(true, ut.value().getBoolean("key3"))
+            assertEquals("newvalue", ut.getNullableStringValue("new"))
+            assertEquals(1, ut.getNullableIntValue("key1"))
+            assertEquals("value1", ut.getNullableStringValue("key2"))
+            assertEquals(true, ut.getBoolean("key3"))
         }
     }
 
@@ -127,17 +127,24 @@ class RiverTest {
         val testService = FailingTestService()
 
         TopologyTestDriver(testService.buildTopology(), config).use { topologyTestDriver ->
-            val inputRecord = factoryForDagpengerBehovTopic.create(Packet(jsonString))
-            topologyTestDriver.pipeInput(inputRecord)
-            val ut = topologyTestDriver.readOutput(
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.deserializer(),
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer()
+
+            val input = topologyTestDriver.createInputTopic(
+                topicName,
+                keySerializer,
+                valueSerializer
             )
 
+            input.pipeInput(Packet(jsonString))
+
+            val ut = topologyTestDriver.createOutputTopic(
+                topicName,
+                keyDeSerializer,
+                valueDeSerializer
+            ).readKeyValue().value
+
             assertTrue { ut != null }
-            assertTrue { ut.value().hasProblem() }
-            assertEquals("Ukjent feil ved behandling av Packet", ut.value().getProblem()?.title)
+            assertTrue { ut.hasProblem() }
+            assertEquals("Ukjent feil ved behandling av Packet", ut.getProblem()?.title)
         }
     }
 
@@ -146,17 +153,24 @@ class RiverTest {
         val testService = FailingTestServiceOnFailure()
 
         TopologyTestDriver(testService.buildTopology(), config).use { topologyTestDriver ->
-            val inputRecord = factoryForDagpengerBehovTopic.create(Packet(jsonString))
-            topologyTestDriver.pipeInput(inputRecord)
-            val ut = topologyTestDriver.readOutput(
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.deserializer(),
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer()
+
+            val input = topologyTestDriver.createInputTopic(
+                topicName,
+                keySerializer,
+                valueSerializer
             )
 
+            input.pipeInput(Packet(jsonString))
+
+            val ut = topologyTestDriver.createOutputTopic(
+                topicName,
+                keyDeSerializer,
+                valueDeSerializer
+            ).readKeyValue().value
+
             assertTrue { ut != null }
-            assertTrue { ut.value().hasProblem() }
-            assertEquals("Fail to process", ut.value().getProblem()?.title)
+            assertTrue { ut.hasProblem() }
+            assertEquals("Fail to process", ut.getProblem()?.title)
         }
     }
 
@@ -164,19 +178,26 @@ class RiverTest {
     fun ` Should be able to ovveride topic in River`() {
         val testService = TestTopicService()
         TopologyTestDriver(testService.buildTopology(), config).use { topologyTestDriver ->
-            val inputRecord = factoryForTestTopic.create(Packet(jsonString))
-            topologyTestDriver.pipeInput(inputRecord)
-            val ut = topologyTestDriver.readOutput(
-                "test-topic",
-                Serdes.String().deserializer(),
-                PacketDeserializer()
+
+            val input = topologyTestDriver.createInputTopic(
+                testTopic.name,
+                testTopic.keySerde.serializer(),
+                testTopic.valueSerde.serializer()
             )
 
+            input.pipeInput(Packet(jsonString))
+
+            val ut = topologyTestDriver.createOutputTopic(
+                testTopic.name,
+                testTopic.keySerde.deserializer(),
+                testTopic.valueSerde.deserializer()
+            ).readKeyValue().value
+
             assertTrue { ut != null }
-            assertEquals("newvalue", ut.value().getNullableStringValue("new"))
-            assertEquals(1, ut.value().getNullableIntValue("key1"))
-            assertEquals("value1", ut.value().getNullableStringValue("key2"))
-            assertEquals(true, ut.value().getBoolean("key3"))
+            assertEquals("newvalue", ut.getNullableStringValue("new"))
+            assertEquals(1, ut.getNullableIntValue("key1"))
+            assertEquals("value1", ut.getNullableStringValue("key2"))
+            assertEquals(true, ut.getBoolean("key3"))
         }
     }
 
@@ -201,13 +222,20 @@ class RiverTest {
         }
 
         TopologyTestDriver(service.buildTopology(), config).use { topologyTestDriver ->
-            val inputRecord = factoryForTestTopic.create(Packet(jsonString))
-            topologyTestDriver.pipeInput(inputRecord)
-            val ut = topologyTestDriver.readOutput(
-                "test-topic",
-                Serdes.String().deserializer(),
-                PacketDeserializer()
+
+            val input = topologyTestDriver.createInputTopic(
+                testTopic.name,
+                testTopic.keySerde.serializer(),
+                testTopic.valueSerde.serializer()
             )
+
+            input.pipeInput(Packet(jsonString))
+
+            val ut = topologyTestDriver.createOutputTopic(
+                testTopic.name,
+                testTopic.keySerde.deserializer(),
+                testTopic.valueSerde.deserializer()
+            ).readKeyValue().value
             assertTrue { ut != null }
         }
     }

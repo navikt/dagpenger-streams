@@ -3,25 +3,20 @@ package no.nav.dagpenger.streams
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.dagpenger.events.Packet
+import no.nav.dagpenger.streams.Helpers.keySerializer
+import no.nav.dagpenger.streams.Helpers.topicName
+import no.nav.dagpenger.streams.Helpers.valueSerializer
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.TopologyTestDriver
 import org.apache.kafka.streams.kstream.Predicate
-import org.apache.kafka.streams.test.ConsumerRecordFactory
 import org.apache.logging.log4j.ThreadContext
 import org.junit.jupiter.api.Test
 import java.util.Properties
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class PondTest {
 
     companion object {
-
-        val factory = ConsumerRecordFactory<String, Packet>(
-            Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
-            Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.serializer(),
-            Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.serializer()
-        )
 
         val config = Properties().apply {
             this[StreamsConfig.APPLICATION_ID_CONFIG] = "test"
@@ -48,14 +43,13 @@ class PondTest {
         TopologyTestDriver(testPond.buildTopology(), config).use { topologyTestDriver ->
             val packet = Packet("{}")
 
-            topologyTestDriver.pipeInput(factory.create(packet))
-            val ut = topologyTestDriver.readOutput(
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.deserializer(),
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer()
+            val testDriver = topologyTestDriver.createInputTopic(
+                topicName,
+                keySerializer,
+                valueSerializer
             )
 
-            assertTrue { ut == null }
+            testDriver.pipeInput(packet)
             assertEquals(1, testPond.store.size)
         }
     }
@@ -67,14 +61,13 @@ class PondTest {
         TopologyTestDriver(testPond.buildTopology(), config).use { topologyTestDriver ->
             val packet = Packet("{}").apply { this.putValue("Field", "Value") }
 
-            topologyTestDriver.pipeInput(factory.create(packet))
-            val ut = topologyTestDriver.readOutput(
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.deserializer(),
-                Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer()
+            val testDriver = topologyTestDriver.createInputTopic(
+                topicName,
+                keySerializer,
+                valueSerializer
             )
 
-            assertTrue { ut == null }
+            testDriver.pipeInput(packet)
             assertEquals(0, testPond.store.size)
         }
     }
@@ -95,7 +88,14 @@ class PondTest {
 
         TopologyTestDriver(service.buildTopology(), RiverTest.config).use { topologyTestDriver ->
             val packet = Packet("{}")
-            topologyTestDriver.pipeInput(factory.create(packet))
+
+            val testDriver = topologyTestDriver.createInputTopic(
+                topicName,
+                keySerializer,
+                valueSerializer
+            )
+
+            testDriver.pipeInput(packet)
         }
         ThreadContext.get("x_correlation_id") shouldBe null
     }
