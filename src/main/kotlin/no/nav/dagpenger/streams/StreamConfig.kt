@@ -30,25 +30,7 @@ fun streamConfig(
 ): Properties {
     return Properties().apply {
         putAll(
-            listOf(
-                CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 1000,
-                CommonClientConfigs.RECONNECT_BACKOFF_MS_CONFIG to 5000,
-                StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootStapServerUrl,
-                StreamsConfig.APPLICATION_ID_CONFIG to appId,
-
-                StreamsConfig.COMMIT_INTERVAL_MS_CONFIG to 1,
-                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
-                StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG to LogAndFailExceptionHandler::class.java,
-
-                StreamsConfig.producerPrefix(ProducerConfig.COMPRESSION_TYPE_CONFIG) to "snappy",
-                StreamsConfig.producerPrefix(ProducerConfig.BATCH_SIZE_CONFIG) to 32.times(1024).toString(), // 32Kb (default is 16 Kb)
-
-                // Increase max.request.size to 3 MB (default is 1MB )), messages should be compressed but there are currently a bug
-                // in kafka-clients ref https://stackoverflow.com/questions/47696396/kafka-broker-is-not-gzipping-my-bigger-size-message-even-though-i-specified-co/48304851#48304851
-                StreamsConfig.producerPrefix(ProducerConfig.MAX_REQUEST_SIZE_CONFIG) to 5.times(1024).times(1000).toString(),
-
-                StreamsConfig.PROCESSING_GUARANTEE_CONFIG to AT_LEAST_ONCE
-            )
+            commonProperties(bootStapServerUrl, appId)
         )
 
         if (Profile.LOCAL != configuration.profile) {
@@ -79,6 +61,61 @@ fun streamConfig(
         }
     }
 }
+
+fun streamConfigAiven(
+    appId: String,
+    bootStapServerUrl: String,
+    stateDir: String? = null,
+    aivenCredentials: KafkaAivenCredentials? = null,
+    configuration: Configuration = Configuration()
+): Properties {
+    return Properties().apply {
+        putAll(
+            commonProperties(bootStapServerUrl, appId)
+        )
+
+        if (Profile.LOCAL != configuration.profile) {
+            put(StreamsConfig.REPLICATION_FACTOR_CONFIG, "2")
+        }
+
+        stateDir?.let { put(StreamsConfig.STATE_DIR_CONFIG, stateDir) }
+
+        aivenCredentials?.let {
+            put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, it.securityProtocolConfig)
+            put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, it.sslEndpointIdentificationAlgorithmConfig)
+            put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, it.sslTruststoreTypeConfig)
+            put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, it.sslKeystoreTypeConfig)
+            put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, it.sslTruststoreLocationConfig)
+            put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, it.sslTruststorePasswordConfig)
+            put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, it.sslKeystoreLocationConfig)
+            put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, it.sslKeystorePasswordConfig)
+        }
+    }
+}
+
+private fun commonProperties(
+    bootStapServerUrl: String,
+    appId: String
+) = listOf(
+    CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 1000,
+    CommonClientConfigs.RECONNECT_BACKOFF_MS_CONFIG to 5000,
+    StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootStapServerUrl,
+    StreamsConfig.APPLICATION_ID_CONFIG to appId,
+
+    StreamsConfig.COMMIT_INTERVAL_MS_CONFIG to 1,
+    ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
+    StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG to LogAndFailExceptionHandler::class.java,
+
+    StreamsConfig.producerPrefix(ProducerConfig.COMPRESSION_TYPE_CONFIG) to "snappy",
+    StreamsConfig.producerPrefix(ProducerConfig.BATCH_SIZE_CONFIG) to 32.times(1024)
+        .toString(), // 32Kb (default is 16 Kb)
+
+    // Increase max.request.size to 3 MB (default is 1MB )), messages should be compressed but there are currently a bug
+    // in kafka-clients ref https://stackoverflow.com/questions/47696396/kafka-broker-is-not-gzipping-my-bigger-size-message-even-though-i-specified-co/48304851#48304851
+    StreamsConfig.producerPrefix(ProducerConfig.MAX_REQUEST_SIZE_CONFIG) to 5.times(1024).times(1000).toString(),
+
+    StreamsConfig.PROCESSING_GUARANTEE_CONFIG to AT_LEAST_ONCE
+)
 
 private val localProperties = ConfigurationMap(
     mapOf(
