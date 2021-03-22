@@ -10,6 +10,8 @@ import no.nav.dagpenger.streams.Helpers.valueDeSerializer
 import no.nav.dagpenger.streams.Helpers.valueSerializer
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsConfig
+import org.apache.kafka.streams.TestInputTopic
+import org.apache.kafka.streams.TestOutputTopic
 import org.apache.kafka.streams.TopologyTestDriver
 import org.apache.kafka.streams.kstream.Predicate
 import org.apache.logging.log4j.ThreadContext
@@ -88,7 +90,7 @@ class RiverTest {
         }
     }
 
-    class FailingTestService : River(Topics.DAGPENGER_BEHOV_PACKET_EVENT) {
+    open class FailingTestService : River(testTopic) {
         override val SERVICE_APP_ID = "TestService"
 
         override fun filterPredicates(): List<Predicate<String, Packet>> {
@@ -100,7 +102,7 @@ class RiverTest {
         }
     }
 
-    class FailingTestServiceOnFailure : River(Topics.DAGPENGER_BEHOV_PACKET_EVENT) {
+    class FailingTestServiceOnFailure : River(testTopic) {
         override val SERVICE_APP_ID = "TestService"
 
         override fun filterPredicates(): List<Predicate<String, Packet>> {
@@ -128,19 +130,11 @@ class RiverTest {
 
         TopologyTestDriver(testService.buildTopology(), config).use { topologyTestDriver ->
 
-            val input = topologyTestDriver.createInputTopic(
-                topicName,
-                keySerializer,
-                valueSerializer
-            )
+            val input = topologyTestDriver.testInputTopic()
 
             input.pipeInput(Packet(jsonString))
 
-            val ut = topologyTestDriver.createOutputTopic(
-                topicName,
-                keyDeSerializer,
-                valueDeSerializer
-            ).readKeyValue().value
+            val ut = topologyTestDriver.testOutputTopic().readKeyValue().value
 
             assertTrue { ut != null }
             assertTrue { ut.hasProblem() }
@@ -154,19 +148,11 @@ class RiverTest {
 
         TopologyTestDriver(testService.buildTopology(), config).use { topologyTestDriver ->
 
-            val input = topologyTestDriver.createInputTopic(
-                topicName,
-                keySerializer,
-                valueSerializer
-            )
+            val input = topologyTestDriver.testInputTopic()
 
             input.pipeInput(Packet(jsonString))
 
-            val ut = topologyTestDriver.createOutputTopic(
-                topicName,
-                keyDeSerializer,
-                valueDeSerializer
-            ).readKeyValue().value
+            val ut = topologyTestDriver.testOutputTopic().readKeyValue().value
 
             assertTrue { ut != null }
             assertTrue { ut.hasProblem() }
@@ -179,19 +165,11 @@ class RiverTest {
         val testService = TestTopicService()
         TopologyTestDriver(testService.buildTopology(), config).use { topologyTestDriver ->
 
-            val input = topologyTestDriver.createInputTopic(
-                testTopic.name,
-                testTopic.keySerde.serializer(),
-                testTopic.valueSerde.serializer()
-            )
+            val input = topologyTestDriver.testInputTopic()
 
             input.pipeInput(Packet(jsonString))
 
-            val ut = topologyTestDriver.createOutputTopic(
-                testTopic.name,
-                testTopic.keySerde.deserializer(),
-                testTopic.valueSerde.deserializer()
-            ).readKeyValue().value
+            val ut = topologyTestDriver.testOutputTopic().readKeyValue().value
 
             assertTrue { ut != null }
             assertEquals("newvalue", ut.getNullableStringValue("new"))
@@ -223,22 +201,27 @@ class RiverTest {
 
         TopologyTestDriver(service.buildTopology(), config).use { topologyTestDriver ->
 
-            val input = topologyTestDriver.createInputTopic(
-                testTopic.name,
-                testTopic.keySerde.serializer(),
-                testTopic.valueSerde.serializer()
-            )
+            val input = topologyTestDriver.testInputTopic()
 
             input.pipeInput(Packet(jsonString))
 
-            val ut = topologyTestDriver.createOutputTopic(
-                testTopic.name,
-                testTopic.keySerde.deserializer(),
-                testTopic.valueSerde.deserializer()
-            ).readKeyValue().value
+            val ut = topologyTestDriver.testOutputTopic().readKeyValue().value
             assertTrue { ut != null }
         }
     }
+
+    private fun TopologyTestDriver.testInputTopic(): TestInputTopic<String, Packet> =
+        this.createInputTopic(
+            testTopic.name,
+            testTopic.keySerde.serializer(),
+            testTopic.valueSerde.serializer()
+        )
+
+    private fun TopologyTestDriver.testOutputTopic(): TestOutputTopic<String, Packet> = createOutputTopic(
+        testTopic.name,
+        testTopic.keySerde.deserializer(),
+        testTopic.valueSerde.deserializer()
+    )
 
     private val jsonString =
         """

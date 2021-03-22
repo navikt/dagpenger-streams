@@ -4,12 +4,13 @@ import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.micrometer.core.instrument.Clock
-import io.micrometer.core.instrument.binder.kafka.KafkaConsumerMetrics
+import io.micrometer.core.instrument.binder.kafka.KafkaStreamsMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.hotspot.DefaultExports
 import mu.KotlinLogging
+import org.apache.kafka.common.errors.TopicAuthorizationException
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.Topology
 import java.time.Duration
@@ -25,10 +26,11 @@ abstract class Service {
     protected open val withHealthChecks: Boolean = true
     private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
     private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM)
-    private val kafkaConsumerMetrics = KafkaConsumerMetrics().also {
-        it.bindTo(registry)
+    private val streams: KafkaStreams by lazy {
+        setupStreamsInternal().also {
+            KafkaStreamsMetrics(it).also { metrics -> metrics.bindTo(registry) }
+        }
     }
-    private val streams: KafkaStreams by lazy { setupStreamsInternal() }
 
     private val applicationEngine: ApplicationEngine by lazy {
         naisHttpChecks(healthChecks + KafkaStreamHealthCheck(streams))
@@ -75,17 +77,18 @@ abstract class Service {
     abstract fun buildTopology(): Topology
 
     private fun addShutdownHooks() {
-        Thread.currentThread().setUncaughtExceptionHandler { t, e ->
-            logUnexpectedError(t, e)
-            stop()
-        }
         Runtime.getRuntime().addShutdownHook(Thread { stop() })
     }
 
     private fun logUnexpectedError(t: Thread?, e: Throwable) {
-        LOGGER.error(
-            "Uncaught exception in $SERVICE_APP_ID stream, thread: $t message:  ${e.message}",
-            e
-        )
+        when (e) {
+            is TopicAuthorizationException -> LOGGER.warn(
+                "TopicAuthorizationException in $SERVICE_APP_ID stream, stopping app"
+            )
+            else -> LOGGER.error(
+                "Uncaught exception in $SERVICE_APP_ID stream, thread: $t message:  ${e.message}",
+                e
+            )
+        }
     }
 }
