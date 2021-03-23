@@ -1,6 +1,8 @@
 package no.nav.dagpenger.plain
 
 import mu.KotlinLogging
+import no.nav.dagpenger.streams.Credential
+import no.nav.dagpenger.streams.KafkaAivenCredentials
 import no.nav.dagpenger.streams.KafkaCredential
 import no.nav.dagpenger.streams.PacketDeserializer
 import no.nav.dagpenger.streams.PacketSerializer
@@ -24,7 +26,7 @@ val defaultConsumerConfig = Properties().apply {
 fun consumerConfig(
     groupId: String,
     bootstrapServerUrl: String,
-    credential: KafkaCredential? = null,
+    credential: Credential? = null,
     properties: Properties = defaultConsumerConfig
 ): Properties {
     return Properties().apply {
@@ -54,7 +56,7 @@ fun producerConfig(
     }
 }
 
-fun commonConfig(bootstrapServers: String, credential: KafkaCredential? = null): Properties {
+fun commonConfig(bootstrapServers: String, credential: Credential? = null): Properties {
     return Properties().apply {
         put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
         credential?.let { creds ->
@@ -63,25 +65,43 @@ fun commonConfig(bootstrapServers: String, credential: KafkaCredential? = null):
     }
 }
 
-private fun credentials(credential: KafkaCredential): Properties {
-    return Properties().apply {
-        LOGGER.info { "Using user name ${credential.username} to authenticate against Kafka brokers " }
-        put(SaslConfigs.SASL_MECHANISM, "PLAIN")
-        put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
-        put(
-            SaslConfigs.SASL_JAAS_CONFIG,
-            "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${credential.username}\" password=\"${credential.password}\";"
-        )
+private fun credentials(credential: Credential): Properties {
 
-        val trustStoreLocation = System.getenv("NAV_TRUSTSTORE_PATH")
-        trustStoreLocation?.let {
-            try {
-                put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL")
-                put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, File(it).absolutePath)
-                put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, System.getenv("NAV_TRUSTSTORE_PASSWORD"))
-                LOGGER.info { "Configured '${SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG}' location " }
-            } catch (e: Exception) {
-                LOGGER.error { "Failed to set '${SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG}' location " }
+    return when (credential) {
+        is KafkaCredential -> Properties().apply {
+            LOGGER.info { "Using user name ${credential.username} to authenticate against Kafka brokers " }
+            put(SaslConfigs.SASL_MECHANISM, "PLAIN")
+            put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
+            put(
+                SaslConfigs.SASL_JAAS_CONFIG,
+                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${credential.username}\" password=\"${credential.password}\";"
+            )
+
+            val trustStoreLocation = System.getenv("NAV_TRUSTSTORE_PATH")
+            trustStoreLocation?.let {
+                try {
+                    put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL")
+                    put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, File(it).absolutePath)
+                    put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, System.getenv("NAV_TRUSTSTORE_PASSWORD"))
+                    LOGGER.info { "Configured '${SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG}' location " }
+                } catch (e: Exception) {
+                    LOGGER.error { "Failed to set '${SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG}' location " }
+                }
+            }
+        }
+        is KafkaAivenCredentials -> {
+            Properties().apply {
+                put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, credential.securityProtocolConfig)
+                put(
+                    SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG,
+                    credential.sslEndpointIdentificationAlgorithmConfig
+                )
+                put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, credential.sslTruststoreTypeConfig)
+                put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, credential.sslKeystoreTypeConfig)
+                put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, credential.sslTruststoreLocationConfig)
+                put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, credential.sslTruststorePasswordConfig)
+                put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, credential.sslKeystoreLocationConfig)
+                put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, credential.sslKeystorePasswordConfig)
             }
         }
     }
