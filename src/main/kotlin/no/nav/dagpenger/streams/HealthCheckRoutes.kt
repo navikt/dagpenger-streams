@@ -6,7 +6,6 @@ import io.ktor.application.install
 import io.ktor.features.DefaultHeaders
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.response.respondTextWriter
 import io.ktor.routing.Route
@@ -48,7 +47,7 @@ fun Route.healthRoutes(healthChecks: List<HealthCheck>) {
                 failedHealthChecks.forEach {
                     LOGGER.warn { "Health check '${it.name}' failed" }
                 }
-                call.respond(HttpStatusCode.ServiceUnavailable, "ERROR")
+                call.respondText("ERROR", ContentType.Text.Plain, HttpStatusCode.ServiceUnavailable)
             } else {
                 call.respondText("ALIVE", ContentType.Text.Plain)
             }
