@@ -24,7 +24,7 @@ object Cucumber {
 object Dagpenger {
 
     object Biblioteker {
-        const val version = "2021.05.21-12.14.77e9e954892e"
+        const val version = "2021.06.23-13.05.a9a03bec5a52"
         const val stsKlient = "com.github.navikt.dp-biblioteker:sts-klient:$version"
         const val grunnbeløp = "com.github.navikt.dp-biblioteker:grunnbelop:$version"
         const val ktorUtils = "com.github.navikt.dp-biblioteker:ktor-utils:$version"
@@ -45,7 +45,7 @@ object Dagpenger {
         }
     }
 
-    const val Streams = "com.github.navikt:dagpenger-streams:2021.05.21-09.46.d5d2aa7d0a29"
+    const val Streams = "com.github.navikt:dagpenger-streams:2021.06.23-10.14.3148165cac87"
     const val Events = "com.github.navikt:dagpenger-events:2021.06.22-13.11.867907822eb6"
 }
 
@@ -179,7 +179,7 @@ object Log4j2 {
 }
 
 object Micrometer {
-    const val version = "1.4.0"
+    const val version = "1.7.0"
     const val prometheusRegistry = "io.micrometer:micrometer-registry-prometheus:$version"
 }
 
