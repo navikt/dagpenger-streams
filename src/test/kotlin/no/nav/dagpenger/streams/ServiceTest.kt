@@ -12,11 +12,15 @@ import java.net.ServerSocket
 import java.net.URL
 import java.util.Properties
 
-class ServiceTest {
+internal class ServiceTest {
 
-    class ServiceUnderTest(override val withHealthChecks: Boolean, override val healthChecks: List<HealthCheck>) :
+    internal class ServiceUnderTest(override val withHealthChecks: Boolean, override val healthChecks: List<HealthCheck>) :
         Service() {
-        override fun buildTopology(): Topology = StreamsBuilder().build()
+        override fun buildTopology(): Topology {
+            val builder = StreamsBuilder()
+            builder.stream<String, String>("test-topic")
+            return builder.build()
+        }
         override val SERVICE_APP_ID: String = "under-test"
         override val HTTP_PORT: Int = getAvailablePort()
         override fun getConfig(): Properties {

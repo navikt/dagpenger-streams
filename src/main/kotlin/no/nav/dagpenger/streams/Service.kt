@@ -13,6 +13,7 @@ import mu.KotlinLogging
 import org.apache.kafka.common.errors.TopicAuthorizationException
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.Topology
+import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler
 import java.time.Duration
 import java.util.Properties
 
@@ -49,9 +50,10 @@ abstract class Service {
     private fun setupStreamsInternal(): KafkaStreams {
         LOGGER.info("Setting up topology for $SERVICE_APP_ID")
         val streams = KafkaStreams(buildTopology(), getConfig())
-        streams.setUncaughtExceptionHandler { t, e ->
-            logUnexpectedError(t, e)
+        streams.setUncaughtExceptionHandler { exc ->
+            logUnexpectedError(exc)
             stop()
+            StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_CLIENT
         }
         return streams
     }
@@ -80,13 +82,13 @@ abstract class Service {
         Runtime.getRuntime().addShutdownHook(Thread { stop() })
     }
 
-    private fun logUnexpectedError(t: Thread?, e: Throwable) {
+    private fun logUnexpectedError(e: Throwable) {
         when (e) {
             is TopicAuthorizationException -> LOGGER.warn(
                 "TopicAuthorizationException in $SERVICE_APP_ID stream, stopping app"
             )
             else -> LOGGER.error(
-                "Uncaught exception in $SERVICE_APP_ID stream, thread: $t message:  ${e.message}",
+                "Uncaught exception in $SERVICE_APP_ID stream, thread: ${Thread.currentThread()} message:  ${e.message}",
                 e
             )
         }
