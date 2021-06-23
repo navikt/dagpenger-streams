@@ -2,6 +2,7 @@ package no.nav.dagpenger.streams
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.prometheus.client.CollectorRegistry
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.junit.jupiter.api.Test
@@ -15,7 +16,7 @@ import java.util.Properties
 internal class ServiceTest {
 
     internal class ServiceUnderTest(override val withHealthChecks: Boolean, override val healthChecks: List<HealthCheck>) :
-        Service() {
+        Service(CollectorRegistry(true)) {
         override fun buildTopology(): Topology {
             val builder = StreamsBuilder()
             builder.stream<String, String>("test-topic")

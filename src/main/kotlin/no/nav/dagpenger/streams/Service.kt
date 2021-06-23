@@ -20,13 +20,13 @@ import java.util.Properties
 private val LOGGER = KotlinLogging.logger {}
 private val bootstrapServersConfig = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
 
-abstract class Service {
+abstract class Service(val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry) {
     protected abstract val SERVICE_APP_ID: String
     protected open val HTTP_PORT: Int = 8080
     protected open val healthChecks: List<HealthCheck> = emptyList()
     protected open val withHealthChecks: Boolean = true
-    private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
     private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM)
+
     private val streams: KafkaStreams by lazy {
         setupStreamsInternal().also {
             KafkaStreamsMetrics(it).also { metrics -> metrics.bindTo(registry) }
