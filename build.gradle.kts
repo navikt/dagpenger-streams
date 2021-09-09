@@ -51,6 +51,7 @@ dependencies {
     implementation(Log4j2.api)
     implementation(Log4j2.slf4j)
 
+    testImplementation(kotlin("test"))
     testImplementation(Junit5.api)
     testImplementation(KoTest.assertions)
     testImplementation(KoTest.property)
