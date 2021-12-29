@@ -9,6 +9,7 @@ import com.natpryce.konfig.stringType
 import mu.KotlinLogging
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
@@ -17,9 +18,13 @@ import org.apache.kafka.streams.StreamsConfig.AT_LEAST_ONCE
 import org.apache.kafka.streams.errors.LogAndFailExceptionHandler
 import java.io.File
 import java.lang.System.getenv
+import java.time.Duration
 import java.util.Properties
 
 private val LOGGER = KotlinLogging.logger {}
+
+private val maxPollRecords = 50
+private val maxPollIntervalMs = Duration.ofSeconds(60 + maxPollRecords * 2.toLong()).toMillis()
 
 fun streamConfig(
     appId: String,
@@ -99,6 +104,8 @@ private fun commonProperties(
 ) = listOf(
     CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 1000,
     CommonClientConfigs.RECONNECT_BACKOFF_MS_CONFIG to 5000,
+    CommonClientConfigs.MAX_POLL_INTERVAL_MS_CONFIG to "$maxPollIntervalMs",
+    StreamsConfig.consumerPrefix(MAX_POLL_RECORDS_CONFIG) to maxPollRecords,
     StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to bootStapServerUrl,
     StreamsConfig.APPLICATION_ID_CONFIG to appId,
 
