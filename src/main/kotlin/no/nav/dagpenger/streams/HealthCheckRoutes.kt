@@ -1,17 +1,17 @@
 package no.nav.dagpenger.streams
 
-import io.ktor.application.Application
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.features.DefaultHeaders
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.response.respondText
-import io.ktor.response.respondTextWriter
-import io.ktor.routing.Route
-import io.ktor.routing.get
-import io.ktor.routing.route
-import io.ktor.routing.routing
+import io.ktor.server.application.Application
+import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.plugins.defaultheaders.DefaultHeaders
+import io.ktor.server.response.respondText
+import io.ktor.server.response.respondTextWriter
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
 import mu.KotlinLogging
@@ -30,8 +30,8 @@ fun Route.healthRoutes(healthChecks: List<HealthCheck>) {
         get {
             val names = call.request.queryParameters.getAll("name")?.toSet() ?: kotlin.collections.emptySet()
             call.respondTextWriter(
-                io.ktor.http.ContentType.parse(TextFormat.CONTENT_TYPE_004),
-                io.ktor.http.HttpStatusCode.OK
+                ContentType.parse(TextFormat.CONTENT_TYPE_004),
+                HttpStatusCode.OK
             ) {
                 TextFormat.write004(this, CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(names))
             }

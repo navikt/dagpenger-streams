@@ -1,17 +1,18 @@
 package no.nav.dagpenger.streams
 
 import io.kotest.matchers.shouldBe
-import io.ktor.application.Application
-import io.ktor.http.HttpMethod
-import io.ktor.server.testing.handleRequest
-import io.ktor.server.testing.withTestApplication
+import io.ktor.client.request.get
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.testing.ApplicationTestBuilder
+import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 
 class HealthApplicationTest {
 
-    val goodHealthChecks: List<HealthCheck>
+    private val goodHealthChecks: List<HealthCheck>
         get() = listOf(
             mockk<HealthCheck>().also {
                 every { it.status() } returns HealthStatus.UP
@@ -19,19 +20,13 @@ class HealthApplicationTest {
         )
 
     @Test
-    fun `Should have alive, ready and metrics endpoints`() = withTestApplication(api(goodHealthChecks)) {
-        with(handleRequest(HttpMethod.Get, "/isAlive")) {
-            response.status() shouldBe io.ktor.http.HttpStatusCode.OK
-        }
-        with(handleRequest(HttpMethod.Get, "/isReady")) {
-            response.status() shouldBe io.ktor.http.HttpStatusCode.OK
-        }
-        with(handleRequest(HttpMethod.Get, "/metrics")) {
-            response.status() shouldBe io.ktor.http.HttpStatusCode.OK
-        }
+    fun `Should have alive, ready and metrics endpoints`() = test {
+        client.get("/isAlive").status shouldBe HttpStatusCode.OK
+        client.get("/isReady").status shouldBe HttpStatusCode.OK
+        client.get("/metrics").status shouldBe HttpStatusCode.OK
     }
 
-    val badHealthChecks: List<HealthCheck>
+    private val badHealthChecks: List<HealthCheck>
         get() = listOf(
             mockk<HealthCheck>().also {
                 every { it.status() } returns HealthStatus.DOWN
@@ -39,9 +34,18 @@ class HealthApplicationTest {
         )
 
     @Test
-    fun `alive check should fail if a healtcheck is down `() = withTestApplication(api(badHealthChecks)) {
-        with(handleRequest(HttpMethod.Get, "/isAlive")) {
-            response.status() shouldBe io.ktor.http.HttpStatusCode.ServiceUnavailable
+    fun `alive check should fail if a healtcheck is down `() = test(api(badHealthChecks)) {
+        client.get("/isAlive").status shouldBe HttpStatusCode.ServiceUnavailable
+    }
+
+    private fun test(
+        moduleFunction: Application.() -> Unit = api(goodHealthChecks),
+        test: suspend ApplicationTestBuilder.() -> Unit
+    ) {
+
+        return testApplication {
+            application(moduleFunction)
+            test()
         }
     }
 }

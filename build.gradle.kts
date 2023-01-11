@@ -42,7 +42,8 @@ dependencies {
 
     implementation(Kotlin.Logging.kotlinLogging)
 
-    implementation(Ktor.serverNetty)
+    implementation(Ktor2.Server.library("netty"))
+    implementation(Ktor2.Server.library("default-headers"))
 
     implementation(Prometheus.common)
     implementation(Prometheus.hotspot)
@@ -57,10 +58,11 @@ dependencies {
     testImplementation(KoTest.property)
     testImplementation(KoTest.runner)
     testImplementation(Mockk.mockk)
-    testImplementation(Ktor.ktorTest)
+    testImplementation(Ktor2.Server.library("test-host"))
     testImplementation(Kafka.streamTestUtils)
     testImplementation(Json.library)
     testImplementation(TestContainers.kafka)
+    testImplementation(Log4j2.core)
 
     testRuntimeOnly(Junit5.engine)
 }

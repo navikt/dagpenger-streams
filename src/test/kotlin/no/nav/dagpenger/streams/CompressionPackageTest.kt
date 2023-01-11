@@ -30,7 +30,7 @@ private val testTopic = Topic(
 
 private object Kafka {
     val instance by lazy {
-        KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka").withTag("5.3.0")).apply { this.start() }
+        KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka").withTag("6.1.9")).apply { this.start() }
     }
 }
 

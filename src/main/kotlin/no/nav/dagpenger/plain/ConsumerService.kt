@@ -1,14 +1,14 @@
 package no.nav.dagpenger.plain
 
-import io.ktor.application.call
 import io.ktor.http.ContentType
-import io.ktor.response.respondText
-import io.ktor.response.respondTextWriter
-import io.ktor.routing.get
-import io.ktor.routing.routing
+import io.ktor.server.application.call
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.response.respondText
+import io.ktor.server.response.respondTextWriter
+import io.ktor.server.routing.get
+import io.ktor.server.routing.routing
 import io.micrometer.core.instrument.Clock
 import io.micrometer.core.instrument.binder.kafka.KafkaConsumerMetrics
 import io.micrometer.prometheus.PrometheusConfig
@@ -27,6 +27,7 @@ import kotlin.coroutines.CoroutineContext
 
 private val LOGGER = KotlinLogging.logger {}
 
+@Deprecated("Bruk streams versjonen eller rapid & rivers versjon")
 abstract class ConsumerService(
     val bootstrapServer: String = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
 ) : CoroutineScope {

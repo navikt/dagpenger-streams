@@ -2,6 +2,12 @@
 
 [![](https://jitpack.io/v/navikt/dagpenger-streams.svg)](https://jitpack.io/#navikt/dagpenger-streams)
 
+
+# Deprekert
+
+Er i bruk av noen av dagpenger prosjektene. 
+Skal ikke brukes av nye apper, rapid & rivers i stedet - https://github.com/navikt/rapids-and-rivers")
+
 # Streams
 
 A tiny convenience library for building Kafka Streams based services.
