@@ -1,3 +1,4 @@
+import com.diffplug.spotless.LineEnding
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
@@ -123,6 +124,11 @@ spotless {
         target("*.gradle.kts", "buildSrc/**/*.kt*")
         ktlint()
     }
+
+    // Workaround for <https://github.com/diffplug/spotless/issues/1644>
+    // using idea found at
+    // <https://github.com/diffplug/spotless/issues/1527#issuecomment-1409142798>.
+    lineEndings = LineEnding.PLATFORM_NATIVE // or any other except GIT_ATTRIBUTES
 }
 
 tasks.withType<Test> {
