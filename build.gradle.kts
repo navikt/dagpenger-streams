@@ -1,27 +1,23 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("java-library")
     kotlin("jvm") version Kotlin.version
-    id(Spotless.spotless) version Spotless.version
+    id("com.diffplug.spotless") version "6.19.0"
     id("maven-publish")
 }
 
 repositories {
     mavenCentral()
     maven("https://packages.confluent.io/maven/")
-    maven("https://jitpack.io")
+    maven {
+        url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
+    }
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+kotlin {
+    jvmToolchain(17)
 }
 
 group = "com.github.navikt"
@@ -121,11 +117,11 @@ publishing {
 
 spotless {
     kotlin {
-        ktlint(Ktlint.version)
+        ktlint()
     }
     kotlinGradle {
         target("*.gradle.kts", "buildSrc/**/*.kt*")
-        ktlint(Ktlint.version)
+        ktlint()
     }
 }
 

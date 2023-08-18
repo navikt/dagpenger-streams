@@ -80,8 +80,8 @@ class RiverConsumerTest {
         override fun onFailure(packet: Packet, error: Throwable?): Packet {
             packet.addProblem(
                 Problem(
-                    title = error!!.message!!
-                )
+                    title = error!!.message!!,
+                ),
             )
             return packet
         }
@@ -141,8 +141,8 @@ class RiverConsumerTest {
                 consumerConfig(
                     "test-verifier",
                     Kafka.instance.bootstrapServers,
-                    properties = defaultConsumerConfig.apply { put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") }
-                )
+                    properties = defaultConsumerConfig.apply { put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") },
+                ),
             ).use { consumer ->
                 consumer.subscribe(listOf(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name))
                 val records = consumer.poll(Duration.of(5, ChronoUnit.SECONDS))
@@ -167,8 +167,8 @@ class RiverConsumerTest {
                 consumerConfig(
                     "test-verifier",
                     Kafka.instance.bootstrapServers,
-                    properties = defaultConsumerConfig.apply { put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") }
-                )
+                    properties = defaultConsumerConfig.apply { put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") },
+                ),
             ).use { consumer ->
                 consumer.subscribe(listOf(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name))
                 val records = consumer.poll(Duration.of(5, ChronoUnit.SECONDS))
@@ -193,8 +193,8 @@ class RiverConsumerTest {
                 consumerConfig(
                     "test-verifier",
                     Kafka.instance.bootstrapServers,
-                    properties = defaultConsumerConfig.apply { put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") }
-                )
+                    properties = defaultConsumerConfig.apply { put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") },
+                ),
             ).use { consumer ->
                 consumer.subscribe(listOf(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name))
                 val records = consumer.poll(Duration.of(5, ChronoUnit.SECONDS))

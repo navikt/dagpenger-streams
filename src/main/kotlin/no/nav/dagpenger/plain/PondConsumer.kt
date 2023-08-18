@@ -16,7 +16,7 @@ abstract class PondConsumer(brokerUrl: String) : ConsumerService(brokerUrl) {
         KafkaConsumer<String, Packet>(
             getConsumerConfig(),
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.deserializer(),
-            Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer()
+            Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer(),
         ).use { consumer ->
             consumer.subscribe(listOf(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name))
             while (job.isActive) {

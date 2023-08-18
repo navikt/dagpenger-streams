@@ -25,7 +25,7 @@ private val logger = KotlinLogging.logger { }
 private val testTopic = Topic(
     "privat-dagpenger-test",
     keySerde = Serdes.String(),
-    valueSerde = Serdes.serdeFrom(PacketSerializer(), PacketDeserializer())
+    valueSerde = Serdes.serdeFrom(PacketSerializer(), PacketDeserializer()),
 )
 
 private object Kafka {
@@ -48,7 +48,7 @@ class CompressionPackageTest {
             val largeJson = this::class.java.getResource("/unormalt-stor-json.json").readText()
             packet.putValue(
                 "big-json",
-                largeJson
+                largeJson,
 
             )
             return packet
@@ -64,10 +64,10 @@ class CompressionPackageTest {
         val producer = KafkaProducer<String, Packet>(
             producerConfig(
                 clientId = "test",
-                bootstrapServers = Kafka.instance.bootstrapServers
+                bootstrapServers = Kafka.instance.bootstrapServers,
             ).also {
                 it[ProducerConfig.ACKS_CONFIG] = "all"
-            }
+            },
         )
 
         val packet = Packet()
@@ -81,10 +81,10 @@ class CompressionPackageTest {
         val consumer = KafkaConsumer<String, Packet>(
             consumerConfig(
                 groupId = "test2",
-                bootstrapServerUrl = Kafka.instance.bootstrapServers
+                bootstrapServerUrl = Kafka.instance.bootstrapServers,
             ).also {
                 it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
-            }
+            },
         )
 
         consumer.subscribe(listOf(testTopic.name))

@@ -10,13 +10,13 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 
-class HealthApplicationTest {
+class HealthCheckRoutesTest {
 
     private val goodHealthChecks: List<HealthCheck>
         get() = listOf(
             mockk<HealthCheck>().also {
                 every { it.status() } returns HealthStatus.UP
-            }
+            },
         )
 
     @Test
@@ -30,7 +30,7 @@ class HealthApplicationTest {
         get() = listOf(
             mockk<HealthCheck>().also {
                 every { it.status() } returns HealthStatus.DOWN
-            }
+            },
         )
 
     @Test
@@ -40,9 +40,8 @@ class HealthApplicationTest {
 
     private fun test(
         moduleFunction: Application.() -> Unit = api(goodHealthChecks),
-        test: suspend ApplicationTestBuilder.() -> Unit
+        test: suspend ApplicationTestBuilder.() -> Unit,
     ) {
-
         return testApplication {
             application(moduleFunction)
             test()
@@ -51,11 +50,11 @@ class HealthApplicationTest {
 }
 
 private fun api(
-    healthChecks: List<HealthCheck>
+    healthChecks: List<HealthCheck>,
 ): Application.() -> Unit {
     return fun Application.() {
         health(
-            healthChecks
+            healthChecks,
         )
     }
 }

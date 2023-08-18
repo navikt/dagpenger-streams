@@ -27,7 +27,7 @@ class RiverTest {
         private val testTopic = Topic(
             name = "test-topic",
             keySerde = Serdes.String(),
-            valueSerde = Serdes.serdeFrom(PacketSerializer(), PacketDeserializer())
+            valueSerde = Serdes.serdeFrom(PacketSerializer(), PacketDeserializer()),
         )
 
         val config = Properties().apply {
@@ -71,7 +71,7 @@ class RiverTest {
             val input = topologyTestDriver.createInputTopic(
                 topicName,
                 keySerializer,
-                valueSerializer
+                valueSerializer,
             )
 
             input.pipeInput(Packet(jsonString))
@@ -79,7 +79,7 @@ class RiverTest {
             val ut = topologyTestDriver.createOutputTopic(
                 topicName,
                 keyDeSerializer,
-                valueDeSerializer
+                valueDeSerializer,
             ).readKeyValue().value
 
             assertTrue { ut != null }
@@ -116,9 +116,9 @@ class RiverTest {
         override fun onFailure(packet: Packet, error: Throwable?): Packet {
             packet.addProblem(
                 Problem(
-                    title = error!!.message!!
+                    title = error!!.message!!,
 
-                )
+                ),
             )
             return packet
         }
@@ -214,13 +214,13 @@ class RiverTest {
         this.createInputTopic(
             testTopic.name,
             testTopic.keySerde.serializer(),
-            testTopic.valueSerde.serializer()
+            testTopic.valueSerde.serializer(),
         )
 
     private fun TopologyTestDriver.testOutputTopic(): TestOutputTopic<String, Packet> = createOutputTopic(
         testTopic.name,
         testTopic.keySerde.deserializer(),
-        testTopic.valueSerde.deserializer()
+        testTopic.valueSerde.deserializer(),
     )
 
     private val jsonString =

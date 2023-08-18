@@ -24,7 +24,7 @@ abstract class RiverConsumer(brokerUrl: String) : ConsumerService(brokerUrl) {
         reproducer = KafkaProducer(
             getProducerConfig(),
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.serializer(),
-            Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.serializer()
+            Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.serializer(),
         )
         Runtime.getRuntime().addShutdownHook(
             Thread {
@@ -32,7 +32,7 @@ abstract class RiverConsumer(brokerUrl: String) : ConsumerService(brokerUrl) {
                 reproducer.flush()
                 reproducer.close()
                 LOGGER.info("done! ")
-            }
+            },
         )
     }
     override fun run() {
@@ -41,7 +41,7 @@ abstract class RiverConsumer(brokerUrl: String) : ConsumerService(brokerUrl) {
         KafkaConsumer<String, Packet>(
             config,
             Topics.DAGPENGER_BEHOV_PACKET_EVENT.keySerde.deserializer(),
-            Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer()
+            Topics.DAGPENGER_BEHOV_PACKET_EVENT.valueSerde.deserializer(),
         ).use { consumer ->
             consumer.subscribe(listOf(Topics.DAGPENGER_BEHOV_PACKET_EVENT.name))
             while (job.isActive) {
@@ -84,8 +84,8 @@ abstract class RiverConsumer(brokerUrl: String) : ConsumerService(brokerUrl) {
             ProducerRecord(
                 Topics.DAGPENGER_BEHOV_PACKET_EVENT.name,
                 key,
-                packet
-            )
+                packet,
+            ),
         ) { metadata, exception ->
             exception?.let { LOGGER.error { "Failed to produce Packet" } }
             metadata?.let { LOGGER.info { "Produced Packet on topic ${metadata.topic()} to offset ${metadata.offset()} with the key $key" } }
@@ -95,8 +95,8 @@ abstract class RiverConsumer(brokerUrl: String) : ConsumerService(brokerUrl) {
     open fun onFailure(packet: Packet, error: Throwable?): Packet {
         packet.addProblem(
             Problem(
-                title = "Ukjent feil ved behandling av Packet"
-            )
+                title = "Ukjent feil ved behandling av Packet",
+            ),
         )
         return packet
     }

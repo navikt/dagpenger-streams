@@ -46,7 +46,7 @@ class PondTest {
             val testDriver = topologyTestDriver.createInputTopic(
                 topicName,
                 keySerializer,
-                valueSerializer
+                valueSerializer,
             )
 
             testDriver.pipeInput(packet)
@@ -64,7 +64,7 @@ class PondTest {
             val testDriver = topologyTestDriver.createInputTopic(
                 topicName,
                 keySerializer,
-                valueSerializer
+                valueSerializer,
             )
 
             testDriver.pipeInput(packet)
@@ -92,7 +92,7 @@ class PondTest {
             val testDriver = topologyTestDriver.createInputTopic(
                 topicName,
                 keySerializer,
-                valueSerializer
+                valueSerializer,
             )
 
             testDriver.pipeInput(packet)

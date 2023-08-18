@@ -38,7 +38,7 @@ abstract class River(private val topic: Topic<String, Packet>) : Service() {
                     { throwable ->
                         LOGGER.error(throwable) { "Failed to process packet $packet" }
                         return@mapValues onFailure(packet, throwable)
-                    }
+                    },
                 )
             }
             .peek { key, packet -> LOGGER.debug { "Producing packet with key $key and value: $packet" } }
@@ -53,8 +53,8 @@ abstract class River(private val topic: Topic<String, Packet>) : Service() {
     open fun onFailure(packet: Packet, error: Throwable?): Packet {
         packet.addProblem(
             Problem(
-                title = "Ukjent feil ved behandling av Packet"
-            )
+                title = "Ukjent feil ved behandling av Packet",
+            ),
         )
         return packet
     }

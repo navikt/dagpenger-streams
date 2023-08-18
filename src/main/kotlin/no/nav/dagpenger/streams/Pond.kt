@@ -8,6 +8,7 @@ import org.apache.kafka.streams.kstream.Predicate
 import org.apache.logging.log4j.ThreadContext
 
 private val LOGGER = KotlinLogging.logger {}
+
 @Deprecated("Bruk rapid & rivers i stedet - https://github.com/navikt/rapids-and-rivers")
 abstract class Pond(private val topic: Topic<String, Packet>) : Service() {
 

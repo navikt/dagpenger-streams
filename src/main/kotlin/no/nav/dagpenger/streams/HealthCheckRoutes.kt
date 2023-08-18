@@ -31,7 +31,7 @@ fun Route.healthRoutes(healthChecks: List<HealthCheck>) {
             val names = call.request.queryParameters.getAll("name")?.toSet() ?: kotlin.collections.emptySet()
             call.respondTextWriter(
                 ContentType.parse(TextFormat.CONTENT_TYPE_004),
-                HttpStatusCode.OK
+                HttpStatusCode.OK,
             ) {
                 TextFormat.write004(this, CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(names))
             }

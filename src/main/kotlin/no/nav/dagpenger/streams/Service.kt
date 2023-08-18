@@ -85,11 +85,11 @@ abstract class Service(val collectorRegistry: CollectorRegistry = CollectorRegis
     private fun logUnexpectedError(e: Throwable) {
         when (e) {
             is TopicAuthorizationException -> LOGGER.warn(
-                "TopicAuthorizationException in $SERVICE_APP_ID stream, stopping app"
+                "TopicAuthorizationException in $SERVICE_APP_ID stream, stopping app",
             )
             else -> LOGGER.error(
                 "Uncaught exception in $SERVICE_APP_ID stream, thread: ${Thread.currentThread()} message:  ${e.message}",
-                e
+                e,
             )
         }
     }

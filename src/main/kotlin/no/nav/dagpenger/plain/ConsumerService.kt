@@ -29,7 +29,7 @@ private val LOGGER = KotlinLogging.logger {}
 
 @Deprecated("Bruk streams versjonen eller rapid & rivers versjon")
 abstract class ConsumerService(
-    val bootstrapServer: String = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092"
+    val bootstrapServer: String = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?: "localhost:9092",
 ) : CoroutineScope {
     protected abstract val SERVICE_APP_ID: String
     protected open val HTTP_PORT: Int = 8080

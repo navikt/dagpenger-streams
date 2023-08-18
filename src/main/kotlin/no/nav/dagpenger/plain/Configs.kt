@@ -27,7 +27,7 @@ fun consumerConfig(
     groupId: String,
     bootstrapServerUrl: String,
     credential: Credential? = null,
-    properties: Properties = defaultConsumerConfig
+    properties: Properties = defaultConsumerConfig,
 ): Properties {
     return Properties().apply {
         putAll(properties)
@@ -47,7 +47,7 @@ fun producerConfig(
     clientId: String,
     bootstrapServers: String,
     credential: KafkaCredential? = null,
-    properties: Properties = defaultProducerConfig
+    properties: Properties = defaultProducerConfig,
 ): Properties {
     return Properties().apply {
         putAll(properties)
@@ -66,7 +66,6 @@ fun commonConfig(bootstrapServers: String, credential: Credential? = null): Prop
 }
 
 private fun credentials(credential: Credential): Properties {
-
     return when (credential) {
         is KafkaCredential -> Properties().apply {
             LOGGER.info { "Using user name ${credential.username} to authenticate against Kafka brokers " }
@@ -74,7 +73,7 @@ private fun credentials(credential: Credential): Properties {
             put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
             put(
                 SaslConfigs.SASL_JAAS_CONFIG,
-                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${credential.username}\" password=\"${credential.password}\";"
+                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${credential.username}\" password=\"${credential.password}\";",
             )
 
             val trustStoreLocation = System.getenv("NAV_TRUSTSTORE_PATH")
@@ -94,7 +93,7 @@ private fun credentials(credential: Credential): Properties {
                 put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, credential.securityProtocolConfig)
                 put(
                     SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG,
-                    credential.sslEndpointIdentificationAlgorithmConfig
+                    credential.sslEndpointIdentificationAlgorithmConfig,
                 )
                 put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, credential.sslTruststoreTypeConfig)
                 put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, credential.sslKeystoreTypeConfig)

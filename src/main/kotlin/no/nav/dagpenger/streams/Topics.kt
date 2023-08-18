@@ -21,82 +21,80 @@ object Topics {
     val JOARK_EVENTS = Topic(
         "aapen-dok-journalfoering-v1",
         keySerde = strings,
-        valueSerde = genericAvro
+        valueSerde = genericAvro,
     )
 
     val INNGÅENDE_JOURNALPOST_PACKET_EVENT: Topic<String, Packet> = Topic(
         "privat-dagpenger-journalpost-mottatt-v1",
         keySerde = Serdes.String(),
-        valueSerde = packetSerde
+        valueSerde = packetSerde,
     )
 
     val DAGPENGER_BEHOV_PACKET_EVENT = Topic(
         "privat-dagpenger-behov-v1",
         keySerde = strings,
-        valueSerde = packetSerde
+        valueSerde = packetSerde,
     )
 }
 
 fun <K : Any, V : GenericRecord> StreamsBuilder.consumeGenericTopic(
     topic: Topic<K, V>,
-    schemaRegistryUrl: String?
+    schemaRegistryUrl: String?,
 ): KStream<K, V> {
-
     schemaRegistryUrl?.let {
         topic.keySerde.configure(
             mapOf(
-                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl
+                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl,
             ),
-            true
+            true,
         )
 
         topic.valueSerde.configure(
             mapOf(
-                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl
+                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl,
             ),
-            false
+            false,
         )
     }
 
     return stream<K, V>(
         topic.name,
-        Consumed.with(topic.keySerde, topic.valueSerde)
+        Consumed.with(topic.keySerde, topic.valueSerde),
     )
 }
 
 fun <K : Any, V : SpecificRecord> StreamsBuilder.consumeTopic(
     topic: Topic<K, V>,
-    schemaRegistryUrl: String?
+    schemaRegistryUrl: String?,
 ): KStream<K, V> {
-
     schemaRegistryUrl?.let {
         topic.keySerde.configure(
             mapOf(
-                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl
+                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl,
             ),
-            true
+            true,
         )
 
         topic.valueSerde.configure(
             mapOf(
-                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl
+                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl,
             ),
-            false
+            false,
         )
     }
 
     return stream<K, V>(
         topic.name,
-        Consumed.with(topic.keySerde, topic.valueSerde)
+        Consumed.with(topic.keySerde, topic.valueSerde),
     )
 }
 
 fun <K : Any, V> StreamsBuilder.consumeTopic(
-    topic: Topic<K, V>
+    topic: Topic<K, V>,
 ): KStream<K, V> {
     return stream<K, V>(
         topic.name,
-        Consumed.with(topic.keySerde, topic.valueSerde)
+        Consumed.with(topic.keySerde, topic.valueSerde),
     )
 }
 
@@ -108,17 +106,17 @@ fun <K, V> KStream<K, V>.toTopic(topic: Topic<K, V>, schemaRegistryUrl: String?)
     schemaRegistryUrl?.let {
         topic.keySerde.configure(
             mapOf(
-                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl
+                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl,
             ),
-            true
+            true,
         )
 
         topic.valueSerde.configure(
             mapOf(
                 KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG to true,
-                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl
+                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to schemaRegistryUrl,
             ),
-            false
+            false,
         )
     }
     return to(topic.name, Produced.with(topic.keySerde, topic.valueSerde))

@@ -76,8 +76,8 @@ internal class ServiceTest {
 
                     override val name: String
                         get() = "FailedHealthCheck"
-                }
-            )
+                },
+            ),
         )
         serviceUnderTest.start()
         val port = serviceUnderTest.getPort()

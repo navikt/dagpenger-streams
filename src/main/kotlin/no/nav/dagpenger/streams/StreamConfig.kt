@@ -31,11 +31,11 @@ fun streamConfig(
     bootStapServerUrl: String,
     credential: KafkaCredential? = null,
     stateDir: String? = null,
-    configuration: Configuration = Configuration()
+    configuration: Configuration = Configuration(),
 ): Properties {
     return Properties().apply {
         putAll(
-            commonProperties(bootStapServerUrl, appId)
+            commonProperties(bootStapServerUrl, appId),
         )
 
         if (Profile.LOCAL != configuration.profile) {
@@ -50,7 +50,7 @@ fun streamConfig(
             put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT")
             put(
                 SaslConfigs.SASL_JAAS_CONFIG,
-                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${credential.username}\" password=\"${credential.password}\";"
+                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${credential.username}\" password=\"${credential.password}\";",
             )
 
             configuration.trustStoreLocation?.let {
@@ -72,11 +72,11 @@ fun streamConfigAiven(
     bootStapServerUrl: String,
     stateDir: String? = null,
     aivenCredentials: KafkaAivenCredentials? = null,
-    configuration: Configuration = Configuration()
+    configuration: Configuration = Configuration(),
 ): Properties {
     return Properties().apply {
         putAll(
-            commonProperties(bootStapServerUrl, appId)
+            commonProperties(bootStapServerUrl, appId),
         )
 
         if (Profile.LOCAL != configuration.profile) {
@@ -100,7 +100,7 @@ fun streamConfigAiven(
 
 private fun commonProperties(
     bootStapServerUrl: String,
-    appId: String
+    appId: String,
 ) = listOf(
     CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 1000,
     CommonClientConfigs.RECONNECT_BACKOFF_MS_CONFIG to 5000,
@@ -121,29 +121,29 @@ private fun commonProperties(
     // in kafka-clients ref https://stackoverflow.com/questions/47696396/kafka-broker-is-not-gzipping-my-bigger-size-message-even-though-i-specified-co/48304851#48304851
     StreamsConfig.producerPrefix(ProducerConfig.MAX_REQUEST_SIZE_CONFIG) to 5.times(1024).times(1000).toString(),
 
-    StreamsConfig.PROCESSING_GUARANTEE_CONFIG to AT_LEAST_ONCE
+    StreamsConfig.PROCESSING_GUARANTEE_CONFIG to AT_LEAST_ONCE,
 )
 
 private val localProperties = ConfigurationMap(
     mapOf(
-        "application.profile" to "LOCAL"
-    )
+        "application.profile" to "LOCAL",
+    ),
 )
 private val devProperties = ConfigurationMap(
     mapOf(
-        "application.profile" to "DEV"
+        "application.profile" to "DEV",
 
-    )
+    ),
 )
 private val prodProperties = ConfigurationMap(
     mapOf(
-        "application.profile" to "PROD"
-    )
+        "application.profile" to "PROD",
+    ),
 )
 
 data class Configuration(
     val profile: Profile = config()[Key("application.profile", stringType)].let { Profile.valueOf(it) },
-    val trustStoreLocation: String? = config().getOrNull(Key("nav.truststore.path", stringType))
+    val trustStoreLocation: String? = config().getOrNull(Key("nav.truststore.path", stringType)),
 )
 
 enum class Profile {
