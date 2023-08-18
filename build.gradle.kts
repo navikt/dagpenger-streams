@@ -80,7 +80,21 @@ configurations {
     }
 }
 
+val githubUser: String? by project
+val githubPassword: String? by project
+
 publishing {
+
+    repositories {
+        maven {
+            url = uri("https://maven.pkg.github.com/navikt/dagpenger-streams")
+            credentials {
+                username = githubUser
+                password = githubPassword
+            }
+        }
+    }
+
     publications {
         create("mavenJava", MavenPublication::class.java) {
             from(components["java"])
