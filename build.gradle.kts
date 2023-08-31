@@ -12,9 +12,7 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://packages.confluent.io/maven/")
-    maven {
-        url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
-    }
+    maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
 }
 
 kotlin {
